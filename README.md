@@ -5,7 +5,7 @@ Three full webGui reskins for Unraid 7.3+, each with a live animated background 
 | | **Starfield** (Nebula) | **Hexgrid** (Ember) | **Parity** (Array) |
 |---|---|---|---|
 | Palette | deep purple, violet accent | black, grey, orange | Unraid brand red → orange on charcoal |
-| Background | three-layer parallax starfield drifting left; stars twinkle and scatter away from the cursor | hex grid under a drifting black→grey→orange gradient; neighbouring hexes randomly slide past each other and swap places; hexes warm up under the cursor | a live disk array: one lane of blocks per disk, every 7th a parity disk; writes heat blocks red→orange (and update the parity block on the same stripe), sequential writes run down lanes, a parity-check band sweeps the array, idle disks spin down and dim; blocks warm under the cursor |
+| Background | three-layer parallax starfield drifting left; stars twinkle and scatter away from the cursor | hex grid under a drifting black→grey→orange gradient; neighbouring hexes randomly slide past each other and swap places; hexes warm up under the cursor | **live**: a row of wells along the bottom, one per array disk / parity / pool, filled to each disk's real used % (spun-down disks go dark); particles stream down into disks at their real write rate and rise back up at their real read rate; the top edge glows with network traffic; hover a well for name, read/write speed, usage and temperature |
 | Fonts | Orbitron (headings, nav) + Exo 2 (body) | same | Unraid's own bitstream (labels) + clear-sans (body) |
 | Panels | chamfered glass | chamfered glass | square, red→orange gradient accent bars |
 
@@ -46,7 +46,7 @@ With *prefers-reduced-motion* set, a single still frame is drawn.
 
 Each plugin installs a `Menu="Buttons"` page, which Unraid includes in the `<head>` of every webGui page. It loads one
 stylesheet (overriding Unraid's CSS variables, plus a few targeted rules) and one script that inserts a fixed
-`<canvas>` behind the page. No core files are modified.
+`<canvas>` behind the page. No core files are modified. The Parity theme also installs `parity-stats.php`, a read-only JSON endpoint (behind the normal webGui login) that reports per-disk read/write rates from `diskload.ini`, usage/spin-down/temperature from `disks.ini`, and network throughput; the page polls it every 2 s only while the tab is visible.
 
 ## Building
 
