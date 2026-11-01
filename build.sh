@@ -90,10 +90,19 @@ HDR2
 <![CDATA[
 MID
   cat "$js"
-  cat <<FTR
+  cat <<'EOJS'
 ]]>
 </INLINE>
 </FILE>
+EOJS
+  # optional live-data endpoint (parity theme)
+  if [ -f "$name-stats.php" ]; then
+    if grep -q "]]>" "$name-stats.php"; then echo "$name-stats.php contains ]]>" >&2; exit 1; fi
+    printf '<FILE Name="&emhttp;/%s-stats.php">\n<INLINE>\n<![CDATA[\n' "$name"
+    cat "$name-stats.php"
+    printf ']]>\n</INLINE>\n</FILE>\n'
+  fi
+  cat <<FTR
 <FILE Run="/bin/bash">
 <INLINE>
 mkdir -p /usr/local/emhttp/plugins/$name/fonts
