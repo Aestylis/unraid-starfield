@@ -9,6 +9,7 @@ Kirigami.FormLayout {
     property var wallpaperConfiguration
     property var configDialog
 
+    property alias cfg_scene: sceneCombo.currentIndex
     property alias cfg_pixelSize: pixSpin.value
     property alias cfg_fps: fpsSpin.value
     property alias cfg_snowDensity: snowSlider.value
@@ -17,6 +18,11 @@ Kirigami.FormLayout {
     property alias cfg_flicker: flickerSlider.value
     property alias cfg_erosionMode: erosionCombo.currentIndex
 
+    QQC2.ComboBox {
+        id: sceneCombo
+        Kirigami.FormData.label: i18n("Scene:")
+        model: [i18n("Road"), i18n("Sky (for a monitor above the road)")]
+    }
     QQC2.SpinBox {
         id: pixSpin
         Kirigami.FormData.label: i18n("Pixel size:")

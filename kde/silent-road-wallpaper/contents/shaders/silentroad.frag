@@ -263,12 +263,18 @@ void main() {
         float dens  = (l == 0 ? 0.30 : l == 1 ? 0.22 : l == 2 ? 0.12 : 0.025) * snowAmt * 2.0;
         float size  = l == 0 ? 0.55 : l == 1 ? 0.65 : l == 2 ? 0.9  : 2.2;
         float bright= l == 0 ? 0.35 : l == 1 ? 0.55 : l == 2 ? 0.8  : 0.9;
-        vec2 sp = pp + vec2(-wind * wm, time * speed);
+        // varied fall speed: every column of cells has its own pace, so flakes slide past each other
+        float sx = pp.x - wind * wm;
+        float colH = hash11(floor(sx / cs) * 0.618 + float(l) * 9.1);
+        vec2 sp = vec2(sx, pp.y + time * speed * (0.6 + 0.8 * colH) + colH * 997.0);
         vec2 cell = floor(sp / cs);
         vec2 h = hash22(cell + float(l) * 31.7);
-        if (h.x > dens) continue;
+        // patchy, breathing snowfall: slow drifting bands of heavier/lighter snow + intensity that swells over minutes
+        float patchy = smoothstep(0.2, 0.8, vnoise(cell * cs * 0.011 + vec2(time * 0.018, -time * 0.008) + float(l) * 3.7));
+        float swell = 0.5 + 0.5 * noise1(time / 70.0 + float(l) * 1.3);
+        if (h.x > dens * (0.25 + 1.5 * patchy) * (0.45 + 0.75 * swell)) continue;
         vec2 c = (cell + 0.15 + 0.7 * hash22(cell * 1.37 + float(l))) * cs;
-        c.x += sin(time * (0.4 + h.y) + h.y * 40.0) * (1.0 + float(l));       // gentle sway
+        c.x += sin(time * (0.3 + 0.9 * h.y) + h.y * 40.0) * (0.3 + 1.7 * hash11(h.y * 71.0)) * (1.0 + float(l));   // each flake its own sway       // gentle sway
         float d = length(sp - c);
         if (d < size) flake = max(flake, bright * (l == 3 ? smoothstep(size, size * 0.3, d) : 1.0));
     }
