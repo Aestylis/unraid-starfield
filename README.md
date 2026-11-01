@@ -63,12 +63,13 @@ automatically (date-based version).
 
 ## Bonus: Hexgrid as a KDE Plasma 6 wallpaper
 
-`kde/hexgrid-wallpaper/` is a native Plasma 6 animated wallpaper port of the hex grid (same gradient field and swaps,
-drawn with a QML Canvas). Install for your user and pick **Hexgrid (Ember)** under *Desktop and Wallpaper → Wallpaper
+`kde/hexgrid-wallpaper/` is a native Plasma 6 animated wallpaper port of the hex grid (same gradient field and swaps),
+rendered on the GPU with a fragment shader (~4% of one CPU core at 3440x1440, 24 fps). Rebuild the shader after
+editing with `qsb --glsl "100 es,120,150" --hlsl 50 --msl 12 -o hexgrid.frag.qsb hexgrid.frag` (qt6-qtshadertools). Install for your user and pick **Hexgrid (Ember)** under *Desktop and Wallpaper → Wallpaper
 type*:
 
 ```
 kpackagetool6 -t Plasma/Wallpaper -i kde/hexgrid-wallpaper      # upgrade later with -u
 ```
 
-Settings: hex size, frame rate, swaps per second, cursor glow (works when the pointer is over bare desktop).
+Settings: hex size, frame rate, swaps per second.
