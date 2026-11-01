@@ -17,6 +17,9 @@ Kirigami.FormLayout {
     property alias cfg_windStrength: windSlider.value
     property alias cfg_flicker: flickerSlider.value
     property alias cfg_erosionMode: erosionCombo.currentIndex
+    property real cfg_latitude: 42.51
+    property real cfg_longitude: -123.39
+    property int cfg_previewHour: -1
 
     QQC2.ComboBox {
         id: sceneCombo
@@ -56,6 +59,33 @@ Kirigami.FormLayout {
     QQC2.ComboBox {
         id: erosionCombo
         Kirigami.FormData.label: i18n("Winter:")
-        model: [i18n("Follows the night (road fades toward 3:30 AM)"), i18n("Always clear"), i18n("Always buried")]
+        model: [i18n("Follows the day (snow builds overnight, ploughed after sunrise)"), i18n("Always clear"), i18n("Always buried")]
+    }
+    QQC2.TextField {
+        Kirigami.FormData.label: i18n("Latitude:")
+        text: root.cfg_latitude.toFixed(4)
+        validator: DoubleValidator { bottom: -90; top: 90 }
+        onEditingFinished: root.cfg_latitude = parseFloat(text)
+    }
+    QQC2.TextField {
+        Kirigami.FormData.label: i18n("Longitude:")
+        text: root.cfg_longitude.toFixed(4)
+        validator: DoubleValidator { bottom: -180; top: 180 }
+        onEditingFinished: root.cfg_longitude = parseFloat(text)
+    }
+    QQC2.Label {
+        text: i18n("Default: Grants Pass, OR (west is negative). Drives real sunrise, sunset and sun position.")
+        font: Kirigami.Theme.smallFont
+        opacity: 0.7
+    }
+    QQC2.ComboBox {
+        Kirigami.FormData.label: i18n("Time of day:")
+        model: {
+            var m = [i18n("Live (real time)")]
+            for (var h = 0; h < 24; h++) m.push(i18n("Preview %1:00", h))
+            return m
+        }
+        currentIndex: root.cfg_previewHour + 1
+        onActivated: root.cfg_previewHour = currentIndex - 1
     }
 }

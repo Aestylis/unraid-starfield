@@ -79,8 +79,10 @@ Settings: hex size, frame rate, swaps per second.
 `kde/silent-road-wallpaper/` is a fully procedural pixel-art winter night — an empty snowy road, two dim streetlamps,
 a leaning utility pole, buried fence posts — rendered by one GPU fragment shader (no images). 16-colour palette with
 ordered dithering; hash-based snow in three depth layers that is nearly invisible except inside the lamplight; wind
-that drifts through calm/drift/gust moods; fog that gathers. **The road slowly disappears through the real night**:
-clear in the daytime, fog thickening and the fence sinking from ~18:00, most buried around 03:30, clearing by ~07:00.
+that drifts through calm/drift/gust moods; fog that gathers. **Same scene, day and night, from the real sun**: sunrise/sunset/sun position are computed for your
+latitude/longitude (default Grants Pass, OR). The palette swaps between hand-picked night, dawn, day and dusk sets;
+streetlamps switch off after sunrise and stutter back on at dusk; snow builds on the road through the night until a
+small plough with an amber beacon clears it ~25 minutes after sunrise; the fog lifts by late morning.
 
 ```
 kpackagetool6 -t Plasma/Wallpaper -i kde/silent-road-wallpaper
@@ -89,5 +91,5 @@ kpackagetool6 -t Plasma/Wallpaper -i kde/silent-road-wallpaper
 Pick **Silent County Road** under *Desktop and Wallpaper → Wallpaper type*. For a monitor above the road, set
 **Scene: Sky** on that screen: the moon in its real current phase behind drifting snow clouds, sharing the same clock,
 wind and snowfall. Pixel blocks are sized in physical pixels so scaled monitors match. Shaders use an integer hash, so
-compile them for desktop GL/Vulkan: `qsb --glsl "150,330" --hlsl 50 --msl 12 -o sky.frag.qsb sky.frag`. Settings: pixel size, frame rate, snow,
-fog, wind, and winter mode (follows the night / always clear / always buried).
+compile them for desktop GL/Vulkan: `qsb --glsl "150,330" --hlsl 50 --msl 12 -o sky.frag.qsb sky.frag`. Settings: scene (road / sky), pixel size, frame
+rate, snow, fog, wind, lamp flicker, winter mode, latitude/longitude, and a preview hour to see any time of day.
