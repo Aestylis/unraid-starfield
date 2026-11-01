@@ -1,7 +1,7 @@
-/* Unraid header starfield.
+/* Unraid page starfield (Nebula theme).
  * Ported from starfinder_campaign_tracker/src/fx/starfield.ts: three parallax layers drift slowly left (redrawn at
- * ~24 fps), a few stars twinkle, and the cursor pushes nearby stars away (they spring back). Sized to #header instead
- * of the window. requestAnimationFrame pauses it in hidden tabs; prefers-reduced-motion draws one still frame.
+ * ~24 fps), a few stars twinkle, and the cursor pushes nearby stars away (they spring back). Fixed behind the whole
+ * page; the Nebula CSS makes surfaces translucent. requestAnimationFrame pauses it in hidden tabs; prefers-reduced-motion draws one still frame.
  */
 (function () {
   'use strict'
@@ -11,13 +11,12 @@
     { perMp: 300, size: 0.8, alpha: 0.8, speed: 8 },
     { perMp: 120, size: 1.15, alpha: 1.0, speed: 14 }, // near: sparse, bright, fastest
   ]
-  // The header is a thin strip, so density-per-megapixel alone leaves it sparse; boost it.
-  var DENSITY = 2.2
-  var ACCENT_RGB = '255,140,47' // Unraid orange, used by ~8% of stars
+  var DENSITY = 1
+  var ACCENT_RGB = '180,140,255' // Nebula violet, used by ~8% of stars
   var FRAME_MS = 1000 / 24
   var LAYER_DEPTH = [0.45, 0.75, 1]
-  var PUSH_RADIUS = 120
-  var PUSH_MAX = 28
+  var PUSH_RADIUS = 170
+  var PUSH_MAX = 40
   var SPRING = 0.12
   var DAMPING = 0.78
   var SETTLED = 0.05
@@ -29,14 +28,13 @@
     return 'rgba(255,255,255,' + alpha + ')'
   }
 
-  function Starfield(host) {
+  function Starfield() {
     var self = this
-    this.host = host
     this.reducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
     this.canvas = document.createElement('canvas')
     this.canvas.className = 'starfield-canvas'
     this.canvas.setAttribute('aria-hidden', 'true')
-    host.insertBefore(this.canvas, host.firstChild)
+    document.body.insertBefore(this.canvas, document.body.firstChild)
     this.ctx = this.canvas.getContext('2d')
     if (!this.ctx) return
     this.stars = []
@@ -47,30 +45,27 @@
     this.acc = 0
     this.mx = this.my = -1e6
     this.resize()
-    if (window.ResizeObserver) {
-      var timer
-      new ResizeObserver(function () {
-        clearTimeout(timer)
-        timer = setTimeout(function () { self.resize() }, 150)
-      }).observe(host)
-    }
+    var timer
+    window.addEventListener('resize', function () {
+      clearTimeout(timer)
+      timer = setTimeout(function () { self.resize() }, 150)
+    })
     if (this.reducedMotion) return
-    host.addEventListener('pointermove', function (e) {
-      var r = self.canvas.getBoundingClientRect()
-      self.mx = e.clientX - r.left
-      self.my = e.clientY - r.top
+    window.addEventListener('pointermove', function (e) {
+      self.mx = e.clientX
+      self.my = e.clientY
     })
     var leave = function () { self.mx = self.my = -1e6 }
-    host.addEventListener('pointerleave', leave)
+    document.addEventListener('mouseleave', leave)
     window.addEventListener('blur', leave)
-    host.addEventListener('pointerup', function (e) { if (e.pointerType !== 'mouse') leave() })
+    window.addEventListener('pointerup', function (e) { if (e.pointerType !== 'mouse') leave() })
     this.last = performance.now()
     requestAnimationFrame(function loop(t) { self.tick(t); requestAnimationFrame(loop) })
   }
 
   Starfield.prototype.resize = function () {
-    var w = Math.max(1, this.host.clientWidth)
-    var h = Math.max(1, this.host.clientHeight)
+    var w = Math.max(1, window.innerWidth)
+    var h = Math.max(1, window.innerHeight)
     if (w === this.w && h === this.h && this.stars.length) return
     this.w = w
     this.h = h
@@ -158,10 +153,8 @@
   }
 
   function start() {
-    var header = document.getElementById('header')
-    if (!header || header.querySelector('.starfield-canvas')) return
-    document.documentElement.classList.add('starfield-on')
-    new Starfield(header)
+    if (!document.body || document.querySelector('.starfield-canvas')) return
+    new Starfield()
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start)
   else start()

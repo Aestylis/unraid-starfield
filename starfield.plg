@@ -1,13 +1,13 @@
 <?xml version='1.0' standalone='yes'?>
 <!DOCTYPE PLUGIN [
 <!ENTITY name "starfield">
-<!ENTITY version "2026.10.31.2255">
+<!ENTITY version "2026.10.31.2300">
 <!ENTITY emhttp "/usr/local/emhttp/plugins/&name;">
 ]>
 <PLUGIN name="&name;" author="quentin" version="&version;" min="7.0.0" icon="star">
 <CHANGES>
 ###&version;
-- Animated starfield in place of the header banner image
+- Nebula theme (Starfinder tracker palette, Orbitron/Exo 2) with a page-wide animated starfield
 </CHANGES>
 <FILE Name="&emhttp;/StarfieldHeader.page">
 <INLINE>
@@ -15,41 +15,233 @@
 Menu="Buttons:199"
 Link="nav-starfield"
 ---
-<link type="text/css" rel="stylesheet" href="<?autov('/plugins/starfield/starfield.css')?>">
+<link type="text/css" rel="stylesheet" href="<?autov('/plugins/starfield/nebula.css')?>">
 <script src="<?autov('/plugins/starfield/starfield.js')?>"></script>
 ]]>
 </INLINE>
 </FILE>
-<FILE Name="&emhttp;/starfield.css">
+<FILE Name="&emhttp;/nebula.css">
 <INLINE>
 <![CDATA[
-/* Replace the banner image with a deep-space backdrop; the canvas sits behind the header's own content.
- * #header is position:relative with a z-index, so it is a stacking context: z-index -1 paints above its
- * background but below its children. */
-html.starfield-on #header {
-  background-image: none !important;
-  background-color: #03040a !important;
-  isolation: isolate;
+/* Nebula theme for the Unraid webGui, from starfinder_campaign_tracker/src/theme/tokens.css (nebula preset).
+ * Unraid themes are CSS variables on :root; `html:root` outranks them, and this file loads in <head> after the theme,
+ * so there is no flash of the old colours. Surfaces are translucent so the page-wide starfield shows through. */
+@font-face { font-family: 'Orbitron'; font-weight: 500; font-display: swap; src: url('fonts/orbitron-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Orbitron'; font-weight: 700; font-display: swap; src: url('fonts/orbitron-latin-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Exo 2'; font-weight: 400; font-display: swap; src: url('fonts/exo-2-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Exo 2'; font-weight: 600; font-display: swap; src: url('fonts/exo-2-latin-600-normal.woff2') format('woff2'); }
+
+html:root {
+  /* nebula tokens */
+  --nb-bg: #07051a;
+  --nb-bg-elev: #120c2c;
+  --nb-panel: rgba(30, 18, 64, 0.62);
+  --nb-panel-solid: rgba(22, 14, 50, 0.92);
+  --nb-panel-border: rgba(180, 140, 255, 0.45);
+  --nb-hairline: rgba(180, 140, 255, 0.38);
+  --nb-accent: #b48cff;
+  --nb-accent-deep: #7a4dff;
+  --nb-accent-glow: rgba(180, 140, 255, 0.55);
+  --nb-text: #ece6ff;
+  --nb-text-dim: #a99fc8;
+  --nb-link: #7fd8ff;
+  --nb-font-display: 'Orbitron', sans-serif;
+  --nb-font-body: 'Exo 2', sans-serif;
+  --nb-chamfer: 10px;
+  --nb-text-glow: 0 0 12px var(--nb-accent-glow);
+
+  /* Unraid theme variables -> nebula */
+  --text-color: var(--nb-text);
+  --blockquote-text-color: var(--nb-text);
+  --alt-text-color: var(--nb-text-dim);
+  --disabled-text-color: #6f6690;
+  --link-text-color: var(--nb-link);
+
+  --background-color: var(--nb-bg);
+  --opac-background-color: rgba(7, 5, 26, 0.88);
+  --mild-background-color: var(--nb-panel);
+  --usage-bar-background-color: rgba(180, 140, 255, 0.14);
+  --usage-bar-used-background-color: var(--nb-accent);
+  --usage-disk-background-color: rgba(180, 140, 255, 0.14);
+  --radio-background-color: rgba(180, 140, 255, 0.2);
+  --dashboard-background-color: var(--nb-panel);
+  --dashboard-icon-color: var(--nb-accent);
+
+  --border-color: var(--nb-panel-border);
+  --input-border-color: rgba(180, 140, 255, 0.6);
+  --textarea-border-color: var(--nb-hairline);
+  --inverse-border-color: var(--nb-hairline);
+  --table-border-color: var(--nb-hairline);
+  --table-background-color: rgba(18, 12, 44, 0.55);
+  --table-header-background-color: var(--nb-panel);
+  --hover-table-row-background-color: rgba(180, 140, 255, 0.09);
+
+  --footer-text: var(--nb-text-dim);
+  --footer-background-color: rgba(7, 5, 26, 0.82);
+  --small-shadow: 0 0 6px var(--nb-accent-glow);
+  --hr-color: var(--nb-hairline);
+  --checkbox-color: var(--nb-accent);
+  --checkbox-hover-color: #c9a6ff;
+
+  --brand-orange: var(--nb-accent);
+  --brand-red: var(--nb-accent-deep);
+
+  --header-text-color: var(--nb-text);
+  --header-background-color: transparent;
+  --custom-header-background-color: transparent;
+  --banner-gradient: none;
+  --title-header-background-color: var(--nb-panel);
+
+  --scrollbar-color: rgba(180, 140, 255, 0.45);
+  --scrollbar-hover-color: var(--nb-accent);
+
+  --button-text-color: var(--nb-text);
+  --hover-button-border: var(--nb-accent);
+  --hover-button-text-color: #fff;
+
+  --focus-input-bg-color: rgba(30, 18, 64, 0.85);
+  --shade-bg-color: rgba(18, 12, 44, 0.7);
+  --dynamix-filetree-bg-color: var(--nb-bg-elev);
 }
-html.starfield-on #header .starfield-canvas {
-  position: absolute;
+
+/* page: deep purple with Nebula's glow; the starfield canvas sits behind everything */
+html:root body {
+  background-color: var(--nb-bg);
+  background-image: radial-gradient(ellipse at 15% -10%, #2a1556 0%, #0c0824 45%, transparent 75%);
+  background-attachment: fixed;
+  font-family: var(--nb-font-body);
+}
+html:root body input,
+html:root body select,
+html:root body textarea,
+html:root body button {
+  font-family: var(--nb-font-body);
+}
+.starfield-canvas {
+  position: fixed;
   inset: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   z-index: -1;
   pointer-events: none;
 }
+
+/* header: banner image off, stars show through */
+#header {
+  background-image: none !important;
+  background-color: transparent !important;
+  color: var(--nb-text);
+}
 .nav-starfield { display: none !important; }
+
+/* nav bar: glass strip with a hairline, Orbitron labels */
+.nav-tile {
+  background-color: rgba(12, 8, 36, 0.72) !important;
+  backdrop-filter: blur(6px);
+  border-top: 1px solid var(--nb-hairline);
+  border-bottom: 1px solid var(--nb-hairline);
+  font-family: var(--nb-font-display);
+  font-size: 1.1rem;
+}
+.nav-tile .nav-item a { color: var(--nb-text-dim); }
+.nav-tile .nav-item a:hover,
+.nav-tile .nav-item.active a {
+  color: var(--nb-text);
+  text-shadow: var(--nb-text-glow);
+}
+.nav-tile .nav-item.active a { box-shadow: inset 0 -2px 0 var(--nb-accent); }
+
+/* section title bars: chamfered holo panels with a glowing Orbitron label */
+div.title {
+  background-color: var(--nb-panel);
+  backdrop-filter: blur(6px);
+  border-bottom: none;
+  clip-path: polygon(0 0, calc(100% - var(--nb-chamfer)) 0, 100% var(--nb-chamfer), 100% 100%, var(--nb-chamfer) 100%, 0 calc(100% - var(--nb-chamfer)));
+  outline: 1px solid var(--nb-panel-border);
+  outline-offset: -1px;
+  font-family: var(--nb-font-display);
+  font-size: 1.25rem;
+  letter-spacing: 0.08em;
+  color: var(--nb-text);
+  text-shadow: var(--nb-text-glow);
+}
+
+/* tables and panels: translucent so the stars come through */
+table thead tr,
+table.disk_status thead tr,
+table.share_status thead tr {
+  background-color: var(--nb-panel) !important;
+  font-family: var(--nb-font-display);
+  letter-spacing: 0.05em;
+}
+
+/* buttons: violet frame, glow on hover */
+input[type="button"],
+input[type="reset"],
+input[type="submit"],
+button:not([role="tab"]),
+a.button {
+  font-family: var(--nb-font-display) !important;
+  letter-spacing: 0.06em;
+}
+input[type="button"]:hover,
+input[type="reset"]:hover,
+input[type="submit"]:hover,
+button:not([role="tab"]):hover,
+a.button:hover {
+  box-shadow: 0 0 12px var(--nb-accent-glow);
+}
+
+/* inputs */
+input[type="text"],
+input[type="password"],
+input[type="number"],
+input[type="email"],
+select,
+textarea {
+  color: var(--nb-text);
+}
+input:focus,
+select:focus,
+textarea:focus {
+  box-shadow: 0 0 8px var(--nb-accent-glow);
+}
+
+/* tabs */
+.tabs button[role="tab"][aria-selected="true"] {
+  border-color: var(--nb-accent);
+  text-shadow: var(--nb-text-glow);
+}
+.tabs button[role="tab"] { font-family: var(--nb-font-display); }
+
+/* footer: glass strip */
+#footer {
+  backdrop-filter: blur(6px);
+  border-top: 1px solid var(--nb-hairline);
+}
+
+/* popups/dialogs stay solid so text over them is readable */
+.sweet-alert,
+.ui-dialog,
+.ui-dialog .ui-dialog-content {
+  background-color: var(--nb-panel-solid) !important;
+  color: var(--nb-text) !important;
+  border: 1px solid var(--nb-panel-border);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  html:root { --nb-panel: var(--nb-panel-solid); }
+}
 ]]>
 </INLINE>
 </FILE>
 <FILE Name="&emhttp;/starfield.js">
 <INLINE>
 <![CDATA[
-/* Unraid header starfield.
+/* Unraid page starfield (Nebula theme).
  * Ported from starfinder_campaign_tracker/src/fx/starfield.ts: three parallax layers drift slowly left (redrawn at
- * ~24 fps), a few stars twinkle, and the cursor pushes nearby stars away (they spring back). Sized to #header instead
- * of the window. requestAnimationFrame pauses it in hidden tabs; prefers-reduced-motion draws one still frame.
+ * ~24 fps), a few stars twinkle, and the cursor pushes nearby stars away (they spring back). Fixed behind the whole
+ * page; the Nebula CSS makes surfaces translucent. requestAnimationFrame pauses it in hidden tabs; prefers-reduced-motion draws one still frame.
  */
 (function () {
   'use strict'
@@ -59,13 +251,12 @@ html.starfield-on #header .starfield-canvas {
     { perMp: 300, size: 0.8, alpha: 0.8, speed: 8 },
     { perMp: 120, size: 1.15, alpha: 1.0, speed: 14 }, // near: sparse, bright, fastest
   ]
-  // The header is a thin strip, so density-per-megapixel alone leaves it sparse; boost it.
-  var DENSITY = 2.2
-  var ACCENT_RGB = '255,140,47' // Unraid orange, used by ~8% of stars
+  var DENSITY = 1
+  var ACCENT_RGB = '180,140,255' // Nebula violet, used by ~8% of stars
   var FRAME_MS = 1000 / 24
   var LAYER_DEPTH = [0.45, 0.75, 1]
-  var PUSH_RADIUS = 120
-  var PUSH_MAX = 28
+  var PUSH_RADIUS = 170
+  var PUSH_MAX = 40
   var SPRING = 0.12
   var DAMPING = 0.78
   var SETTLED = 0.05
@@ -77,14 +268,13 @@ html.starfield-on #header .starfield-canvas {
     return 'rgba(255,255,255,' + alpha + ')'
   }
 
-  function Starfield(host) {
+  function Starfield() {
     var self = this
-    this.host = host
     this.reducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
     this.canvas = document.createElement('canvas')
     this.canvas.className = 'starfield-canvas'
     this.canvas.setAttribute('aria-hidden', 'true')
-    host.insertBefore(this.canvas, host.firstChild)
+    document.body.insertBefore(this.canvas, document.body.firstChild)
     this.ctx = this.canvas.getContext('2d')
     if (!this.ctx) return
     this.stars = []
@@ -95,30 +285,27 @@ html.starfield-on #header .starfield-canvas {
     this.acc = 0
     this.mx = this.my = -1e6
     this.resize()
-    if (window.ResizeObserver) {
-      var timer
-      new ResizeObserver(function () {
-        clearTimeout(timer)
-        timer = setTimeout(function () { self.resize() }, 150)
-      }).observe(host)
-    }
+    var timer
+    window.addEventListener('resize', function () {
+      clearTimeout(timer)
+      timer = setTimeout(function () { self.resize() }, 150)
+    })
     if (this.reducedMotion) return
-    host.addEventListener('pointermove', function (e) {
-      var r = self.canvas.getBoundingClientRect()
-      self.mx = e.clientX - r.left
-      self.my = e.clientY - r.top
+    window.addEventListener('pointermove', function (e) {
+      self.mx = e.clientX
+      self.my = e.clientY
     })
     var leave = function () { self.mx = self.my = -1e6 }
-    host.addEventListener('pointerleave', leave)
+    document.addEventListener('mouseleave', leave)
     window.addEventListener('blur', leave)
-    host.addEventListener('pointerup', function (e) { if (e.pointerType !== 'mouse') leave() })
+    window.addEventListener('pointerup', function (e) { if (e.pointerType !== 'mouse') leave() })
     this.last = performance.now()
     requestAnimationFrame(function loop(t) { self.tick(t); requestAnimationFrame(loop) })
   }
 
   Starfield.prototype.resize = function () {
-    var w = Math.max(1, this.host.clientWidth)
-    var h = Math.max(1, this.host.clientHeight)
+    var w = Math.max(1, window.innerWidth)
+    var h = Math.max(1, window.innerHeight)
     if (w === this.w && h === this.h && this.stars.length) return
     this.w = w
     this.h = h
@@ -206,10 +393,8 @@ html.starfield-on #header .starfield-canvas {
   }
 
   function start() {
-    var header = document.getElementById('header')
-    if (!header || header.querySelector('.starfield-canvas')) return
-    document.documentElement.classList.add('starfield-on')
-    new Starfield(header)
+    if (!document.body || document.querySelector('.starfield-canvas')) return
+    new Starfield()
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start)
   else start()
@@ -217,9 +402,18 @@ html.starfield-on #header .starfield-canvas {
 ]]>
 </INLINE>
 </FILE>
+<FILE Run="/bin/bash">
+<INLINE>
+mkdir -p /usr/local/emhttp/plugins/starfield/fonts
+cp /boot/config/plugins/starfield/fonts/*.woff2 /usr/local/emhttp/plugins/starfield/fonts/ 2>/dev/null
+chmod -R a+rX /usr/local/emhttp/plugins/starfield
+rm -f /usr/local/emhttp/plugins/starfield/starfield.css
+echo "starfield: $(ls /usr/local/emhttp/plugins/starfield/fonts | wc -l) fonts installed"
+</INLINE>
+</FILE>
 <FILE Run="/bin/bash" Method="remove">
 <INLINE>
-rm -rf /usr/local/emhttp/plugins/starfield
+rm -rf /usr/local/emhttp/plugins/starfield /boot/config/plugins/starfield
 echo "starfield removed"
 </INLINE>
 </FILE>
