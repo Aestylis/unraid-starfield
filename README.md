@@ -1,12 +1,13 @@
-# Starfield & Hexgrid — animated themes for Unraid
+# Starfield, Hexgrid & Parity — animated themes for Unraid
 
-Two full webGui reskins for Unraid 7.3+, each with a live animated background behind every page.
+Three full webGui reskins for Unraid 7.3+, each with a live animated background behind every page.
 
-| | **Starfield** (Nebula) | **Hexgrid** (Ember) |
-|---|---|---|
-| Palette | deep purple, violet accent | black, grey, orange |
-| Background | three-layer parallax starfield drifting left; stars twinkle and scatter away from the cursor | hex grid under a drifting black→grey→orange gradient; neighbouring hexes randomly slide past each other and swap places; hexes warm up under the cursor |
-| Fonts | Orbitron (headings, nav) + Exo 2 (body) | same |
+| | **Starfield** (Nebula) | **Hexgrid** (Ember) | **Parity** (Array) |
+|---|---|---|---|
+| Palette | deep purple, violet accent | black, grey, orange | Unraid brand red → orange on charcoal |
+| Background | three-layer parallax starfield drifting left; stars twinkle and scatter away from the cursor | hex grid under a drifting black→grey→orange gradient; neighbouring hexes randomly slide past each other and swap places; hexes warm up under the cursor | a live disk array: one lane of blocks per disk, every 7th a parity disk; writes heat blocks red→orange (and update the parity block on the same stripe), sequential writes run down lanes, a parity-check band sweeps the array, idle disks spin down and dim; blocks warm under the cursor |
+| Fonts | Orbitron (headings, nav) + Exo 2 (body) | same | Unraid's own bitstream (labels) + clear-sans (body) |
+| Panels | chamfered glass | chamfered glass | square, red→orange gradient accent bars |
 
 <!-- screenshots: add screenshots/nebula-*.png and screenshots/ember-*.png (blur IPs, serials and share names first) -->
 
@@ -21,10 +22,11 @@ Plugins → Install Plugin, paste one of:
 ```
 https://raw.githubusercontent.com/Aestylis/unraid-starfield/main/starfield.plg
 https://raw.githubusercontent.com/Aestylis/unraid-starfield/main/hexgrid.plg
+https://raw.githubusercontent.com/Aestylis/unraid-starfield/main/parity.plg
 ```
 
-then hard-refresh the browser (Ctrl+Shift+R). **Only one can be installed at a time** — the installer refuses if the
-other is present; remove one before installing the other. Removing a plugin restores the stock look (your banner image
+then hard-refresh the browser (Ctrl+Shift+R). **Only one can be installed at a time** — the installer refuses if another
+is present; remove it before installing a different one. Removing a plugin restores the stock look (your banner image
 and Display Settings are never touched).
 
 ## Performance
@@ -38,7 +40,7 @@ With *prefers-reduced-motion* set, a single still frame is drawn.
 - Other base themes (white / azure / gray) and the sidebar layout should mostly work since the theme overrides Unraid's
   colour variables, but are untested — issues and screenshots welcome.
 - Unraid updates can rename page elements; if the animation or some colours disappear after an update, open an issue.
-- The Nebula theme hue-shifts the Unraid logo to violet; Ember keeps it orange.
+- The Nebula theme hue-shifts the Unraid logo to violet; Ember and Array leave it as-is.
 
 ## How it works
 
@@ -48,8 +50,8 @@ stylesheet (overriding Unraid's CSS variables, plus a few targeted rules) and on
 
 ## Building
 
-Edit `nebula.css`, `starfield.js`, `hexgrid.js` (the Ember stylesheet is generated from `nebula.css` by
-`make-ember.py`), then run `./build.sh` to produce both `.plg` files with the CSS/JS inlined. Bump happens
+Edit `nebula.css`, `starfield.js`, `hexgrid.js` and `parity.js` (the Ember and Array stylesheets are generated from `nebula.css` by
+`make-themes.py`), then run `./build.sh` to produce all three `.plg` files with the CSS/JS inlined. Bump happens
 automatically (date-based version).
 
 ## Credits & licences
