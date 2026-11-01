@@ -270,6 +270,37 @@ textarea:focus {
 }
 img.ca_displayIcon, img.popupIcon { background-color: rgba(180, 140, 255, 0.14); }
 
+/* catch-all for tables whose header/stripe colours are hardcoded (Main boot table, Unassigned Devices, ...) */
+#displaybox table:not(.dashboard) thead tr:first-child > td,
+#displaybox table:not(.dashboard) thead tr > th {
+  background-color: var(--nb-panel) !important;
+}
+#displaybox table:not(.dashboard) tbody tr:nth-child(even) {
+  background-color: rgba(18, 12, 44, 0.55) !important;
+}
+#displaybox table:not(.dashboard) tbody tr:nth-child(odd) {
+  background-color: transparent;
+}
+
+/* header logo: shift Unraid's red-orange gradient into Nebula violet (it lives in a web component) */
+#header unraid-header-os-version {
+  filter: hue-rotate(250deg) saturate(1.15) drop-shadow(0 0 6px rgba(180, 140, 255, 0.45));
+}
+
+/* Stats charts (Highcharts 2 SVG: colours are presentation attributes, which CSS properties override) */
+svg stop[stop-color="rgb(96,96,96)"] { stop-color: rgb(46, 28, 96); }
+svg stop[stop-color="rgb(16,16,16)"] { stop-color: rgb(9, 6, 28); }
+svg [fill="#E68A00" i] { fill: #b48cff; }
+svg [stroke="#E68A00" i] { stroke: #b48cff; }
+svg [fill="#EDC240" i] { fill: #7fd8ff; }
+svg [stroke="#EDC240" i] { stroke: #7fd8ff; }
+svg [fill="#BDE5F8" i] { fill: #ff3df2; }
+svg [stroke="#BDE5F8" i] { stroke: #ff3df2; }
+svg [fill="#4DA74D" i] { fill: #5cff8a; }
+svg [stroke="#4DA74D" i] { stroke: #5cff8a; }
+svg [stroke="#C0C0C0" i] { stroke: rgba(180, 140, 255, 0.22); }
+svg text { font-family: var(--nb-font-body) !important; }
+
 /* footer: glass strip */
 #footer {
   backdrop-filter: blur(6px);
