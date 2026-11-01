@@ -105,9 +105,9 @@ void main() {
     col = mix(col, glow, twi * 0.45 * exp(-p.y * 2.2));                 // dawn / dusk glow rising from below
 
     // sun: tracks across by day (sets below the bottom edge, toward the road screen)
-    vec2 sc = vec2(sunX * A, -0.15 + sunElev * 0.035);
+    vec2 sc = vec2(sunX * A, -0.12 + sin(radians(sunElev)));        // noon in winter ~ halfway up, summer still on screen
     float sunD = length(p - sc);
-    col += mix(glow, vec3(1.0, 0.97, 0.90), day) * exp(-sunD * 5.0) * 0.25 * step(-2.0, sunElev);
+    col += mix(glow, vec3(1.0, 0.97, 0.90), day) * exp(-sunD * 4.0) * 0.34 * step(-2.0, sunElev);
 
     // ---------------- MOON
     vec2 mc = vec2(A * 0.66, 0.58);
@@ -151,7 +151,7 @@ void main() {
     }
 
     // sun disc (clouds below cover it)
-    if (sunElev > 2.0) col = mix(col, vec3(0.99, 0.97, 0.90), smoothstep(0.058, 0.052, sunD) * (0.55 + 0.45 * day));
+    if (sunElev > 2.0) col = mix(col, vec3(0.99, 0.97, 0.90), smoothstep(0.080, 0.073, sunD) * (0.55 + 0.45 * day));
 
     // clouds over everything: shaded bands, silver-lined toward the moon
     if (cloud > 0.0) {

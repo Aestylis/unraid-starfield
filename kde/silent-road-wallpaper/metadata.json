@@ -2,13 +2,17 @@
   "KPlugin": {
     "Id": "aestylis.plasma.wallpaper.silentroad",
     "Name": "Silent County Road",
-    "Version": "1.0",
+    "Version": "1.1",
     "Category": "Wallpaper",
-    "Description": "Procedural pixel-art winter night: an empty snowy road, two dim streetlamps, a leaning pole and buried fence posts. Snow only shows in the lamplight; fog gathers and the road slowly disappears as the real night goes on.",
+    "Description": "Procedural pixel-art winter road that follows your real day: real sunrise/sunset for your location, per-phase palettes, streetlamps that flicker and switch on at dusk, snow that builds overnight until a little plough clears it after sunrise. Includes a matching Sky scene (real moon phase) for a monitor above. One GPU shader, ~1-3% CPU.",
     "Icon": "preferences-desktop-wallpaper",
     "License": "MIT",
     "Website": "https://github.com/Aestylis/unraid-starfield",
-    "Authors": [{ "Name": "Aestylis" }]
+    "Authors": [
+      {
+        "Name": "Aestylis"
+      }
+    ]
   },
   "X-Plasma-API-Minimum-Version": "6.0",
   "X-Plasma-MainScript": "ui/main.qml",

@@ -317,7 +317,19 @@ void main() {
     if (length((p - lamp2) / vec2(0.006, 0.0035)) < 1.0) col = mix(DN(vec3(0.30, 0.24, 0.18), vec3(0.45, 0.46, 0.48)), vec3(0.80, 0.64, 0.42), f2);
     if (abs(p.x - lamp1.x) < 0.012 && p.y > lamp1.y + 0.006 && p.y < lamp1.y + 0.006 + px1 * (1.0 + e)) col = DN(vec3(0.44, 0.48, 0.56), vec3(0.93, 0.95, 0.96));
 
-    // ---------------- PLOUGH (seen from behind, driving away up the road; amber beacon on the cab)
+    // ---------------- LAMPLIGHT on the scene (snow takes the warm light; dark shapes barely)
+    float lum = dot(col, vec3(0.3, 0.5, 0.2));
+    col = mix(col, col + warm * 0.55, clamp(L, 0.0, 1.0) * smoothstep(0.08, 0.30, lum));
+
+    // ---------------- FOG (thickens with the night; warmed in lamplight; dithered by the quantizer)
+    float fogH = exp(-max(0.0, p.y - HZ + 0.06) * 5.0);
+    float n = vnoise(vec2(p.x * 3.0 + time * 0.006, p.y * 9.0 - time * 0.0015)) * 0.6 + vnoise(vec2(p.x * 9.0 - time * 0.01, p.y * 20.0)) * 0.4;
+    float fog = fogAmt * (0.22 + 0.55 * e) * fogH * (0.55 + 0.45 * n);
+    fog += fogAmt * e * 0.18 * smoothstep(0.25, 0.0, abs(p.x - roadCx(p.y))) * step(p.y, HZ);   // the road fades first
+    vec3 fogCol = mix(mix(DN(vec3(0.17, 0.20, 0.26), vec3(0.84, 0.87, 0.90)), glow, twi * 0.22), warm * 0.75, clamp(L * 0.8, 0.0, 0.7));
+    col = mix(col, fogCol, clamp(fog, 0.0, 0.75));
+
+    // ---------------- PLOUGH (drawn after the fog: it is close to the camera; seen from behind, driving away up the road; amber beacon on the cab)
     float beaconGlow = 0.0;
     bool tail = false;
     vec2 beaconP = vec2(-9.0);
@@ -344,18 +356,6 @@ void main() {
         if (on) beaconGlow = exp(-length((p - beaconP) / vec2(0.09, 0.05)) * 2.2) * (1.0 - 0.7 * day);
     }
     col += vec3(0.95, 0.62, 0.25) * beaconGlow * 0.55;
-
-    // ---------------- LAMPLIGHT on the scene (snow takes the warm light; dark shapes barely)
-    float lum = dot(col, vec3(0.3, 0.5, 0.2));
-    col = mix(col, col + warm * 0.55, clamp(L, 0.0, 1.0) * smoothstep(0.08, 0.30, lum));
-
-    // ---------------- FOG (thickens with the night; warmed in lamplight; dithered by the quantizer)
-    float fogH = exp(-max(0.0, p.y - HZ + 0.06) * 5.0);
-    float n = vnoise(vec2(p.x * 3.0 + time * 0.006, p.y * 9.0 - time * 0.0015)) * 0.6 + vnoise(vec2(p.x * 9.0 - time * 0.01, p.y * 20.0)) * 0.4;
-    float fog = fogAmt * (0.22 + 0.55 * e) * fogH * (0.55 + 0.45 * n);
-    fog += fogAmt * e * 0.18 * smoothstep(0.25, 0.0, abs(p.x - roadCx(p.y))) * step(p.y, HZ);   // the road fades first
-    vec3 fogCol = mix(mix(DN(vec3(0.17, 0.20, 0.26), vec3(0.84, 0.87, 0.90)), glow, twi * 0.22), warm * 0.75, clamp(L * 0.8, 0.0, 0.7));
-    col = mix(col, fogCol, clamp(fog, 0.0, 0.75));
 
     // ---------------- WIND mood: smooth offset whose slope changes like weather
     float wind = windAmt * (time * 0.8 + 70.0 * noise1(time / 75.0) + 25.0 * noise1(time / 23.0) + 140.0 * pow(noise1(time / 140.0 + 9.0), 4.0));
