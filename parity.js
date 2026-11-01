@@ -1,13 +1,14 @@
-/* Unraid page background: live share streams (Array theme).
- * Driven by the server's real activity (polled from parity-stats.php every ~2 s while the tab is visible):
- * - a row of "wells" along the bottom, one per array disk, parity and pool; each filled to its real used %, parity
- *   rimmed in red, spun-down disks dark;
- * - writes: particles stream down from the top into the disk being written, at a rate that follows its real MB/s;
- * - reads: particles rise from the disk back up to the top;
- * - the top edge glows with real network traffic;
- * - hover near a well to highlight its stream and show a readout (name, read/write, used/size, temperature).
- * Idle shows only a faint drift. Redraws at ~24 fps; paused in hidden tabs; prefers-reduced-motion draws still frames.
- * (The previous block-grid "disk array" background is in git history.)
+/* Unraid page background: a live circuit board (Array theme).
+ * Data enters at a network connector on the left, runs through a controller chip, and fans out along copper traces to
+ * one chip per disk on the right (parity, data disks, pools). Driven by real activity, polled from parity-stats.php
+ * every ~2 s while the tab is visible:
+ * - writes travel as glowing packets left -> right along that disk's traces; reads travel right -> left;
+ *   the packet rate follows the real MB/s (log scale) and active traces glow;
+ * - each disk chip shows its real used %, parity is red, spun-down disks go dark;
+ * - the connector's traces glow with real network traffic;
+ * - hover a disk chip to highlight its traces and show a readout (name, read/write, used/size, temperature).
+ * The static board is pre-rendered to an offscreen canvas; frames only add glow and packets (~24 fps, paused in hidden
+ * tabs; prefers-reduced-motion draws still frames).
  */
 (function () {
   'use strict'
@@ -15,17 +16,15 @@
   var STATS_URL = '/plugins/parity/parity-stats.php'
   var POLL_MS = 2000
   var FRAME_MS = 1000 / 24
-  var BOTTOM = 44 // gap under the wells (clears the footer)
-  var WELL_H = 64
-  var MAX_PARTICLES = 700
+  var SPEED = 520 // packet speed, px/s
+  var MAX_PACKETS = 450
   var BG = '#0b0b0c'
   var RED = [226, 40, 40]
   var ORANGE = [255, 140, 47]
-  var PALE = [255, 208, 160]
+  var PALE = [255, 214, 170]
+  var COPPER = 'rgba(255,140,47,0.11)'
+  var COPPER_LIVE = 'rgba(255,140,47,0.20)'
 
-  function mix(a, b, t) {
-    return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]
-  }
   function rgba(c, a) {
     return 'rgba(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ',' + a.toFixed(3) + ')'
   }
@@ -35,15 +34,59 @@
     while (b >= 1000 && i < u.length - 1) { b /= 1000; i++ }
     return (b >= 100 || i === 0 ? b.toFixed(0) : b.toFixed(1)) + ' ' + u[i]
   }
-  /** bytes/s -> particles/s: visible at 100 KB/s, heavy (but capped) at hundreds of MB/s */
+  /** bytes/s -> packets/s: visible at ~100 KB/s, heavy (capped) at hundreds of MB/s */
   function pps(bytes) {
-    return bytes <= 0 ? 0 : Math.min(36, 6.5 * Math.log2(1 + bytes / 200000))
+    return bytes <= 0 ? 0 : Math.min(24, 4.5 * Math.log2(1 + bytes / 200000))
   }
-  function gauss() {
-    return (Math.random() + Math.random() + Math.random() - 1.5) / 1.5
+  function rnd(a, b) { return a + Math.random() * (b - a) }
+
+  /** PCB-style route: horizontal, 45-degree diagonal, (vertical if the diagonal runs out of room), horizontal. */
+  function route(x1, y1, x2, y2, xa) {
+    var pts = [[x1, y1]]
+    var dy = y2 - y1
+    if (Math.abs(dy) < 0.5) { pts.push([x2, y2]); return pts }
+    xa = Math.max(x1, Math.min(xa, x2 - 12))
+    var room = Math.max(0, x2 - xa - 12)
+    var d = Math.min(Math.abs(dy), room)
+    var sg = dy > 0 ? 1 : -1
+    pts.push([xa, y1])
+    pts.push([xa + d, y1 + sg * d])
+    if (Math.abs(dy) > d) pts.push([xa + d, y2])
+    pts.push([x2, y2])
+    return pts
+  }
+  /** Polyline with cumulative lengths, for walking packets along it. */
+  function Path(pts) {
+    this.pts = pts
+    this.cum = [0]
+    for (var i = 1; i < pts.length; i++)
+      this.cum.push(this.cum[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]))
+    this.len = this.cum[this.cum.length - 1]
+  }
+  Path.prototype.at = function (s) {
+    s = Math.max(0, Math.min(this.len, s))
+    var i = 1
+    while (i < this.cum.length - 1 && this.cum[i] < s) i++
+    var seg = this.cum[i] - this.cum[i - 1] || 1
+    var t = (s - this.cum[i - 1]) / seg
+    var a = this.pts[i - 1], b = this.pts[i]
+    return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]
+  }
+  function stroke(ctx, pts) {
+    ctx.beginPath()
+    ctx.moveTo(pts[0][0], pts[0][1])
+    for (var i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1])
+    ctx.stroke()
+  }
+  function via(ctx, x, y, r, col) {
+    ctx.beginPath()
+    ctx.arc(x, y, r, 0, Math.PI * 2)
+    ctx.strokeStyle = col
+    ctx.lineWidth = 1.2
+    ctx.stroke()
   }
 
-  function Streams() {
+  function Board() {
     var self = this
     this.reducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
     this.canvas = document.createElement('canvas')
@@ -52,10 +95,10 @@
     document.body.insertBefore(this.canvas, document.body.firstChild)
     this.ctx = this.canvas.getContext('2d')
     if (!this.ctx) return
+    this.board = document.createElement('canvas')
     this.disks = []
-    this.net = { rx: 0, tx: 0, srx: 0, stx: 0 }
-    this.particles = []
-    this.dust = []
+    this.net = { rx: 0, tx: 0, s: 0 }
+    this.packets = []
     this.mx = this.my = -1e6
     this.acc = 0
     this.hovered = -1
@@ -80,7 +123,7 @@
     requestAnimationFrame(function loop(t) { self.tick(t); requestAnimationFrame(loop) })
   }
 
-  Streams.prototype.poll = function () {
+  Board.prototype.poll = function () {
     var self = this
     clearTimeout(this.pollTimer)
     if (document.hidden) return
@@ -93,93 +136,186 @@
       .catch(function () { self.pollTimer = setTimeout(function () { self.poll() }, 10000) })
   }
 
-  Streams.prototype.apply = function (data) {
+  Board.prototype.apply = function (data) {
     var old = {}
     this.disks.forEach(function (d) { old[d.name] = d })
     var list = (data.disks || []).map(function (d) {
-      var o = old[d.name]
-      d.rr = o ? o.rr : 0 // smoothed rates
-      d.rw = o ? o.rw : 0
-      d.accR = d.accW = 0
-      d.glow = o ? o.glow : 0
-      d.hover = o ? o.hover : 0
-      d.srcX = o ? o.srcX : null
-      d.x = o ? o.x : 0
-      d.w = o ? o.w : 0
-      d.shownUsed = o ? o.shownUsed : d.used || 0
+      var o = old[d.name] || {}
+      d.rr = o.rr || 0
+      d.rw = o.rw || 0
+      d.accR = o.accR || 0
+      d.accW = o.accW || 0
+      d.glow = o.glow || 0
+      d.hover = o.hover || 0
+      d.shownUsed = o.shownUsed != null ? o.shownUsed : d.used || 0
       return d
     })
-    // parity first, then data disks, then pools
     var rank = { parity: 0, data: 1, cache: 2 }
     list.sort(function (a, b) { return (rank[a.type] - rank[b.type]) || a.name.localeCompare(b.name, undefined, { numeric: true }) })
-    // particles keep pointing at their disk objects: re-point them at the fresh ones
+    var sig = list.map(function (d) { return d.name }).join(',')
+    var relayout = sig !== this.sig
+    this.sig = sig
+    // carry geometry over when the disk set is unchanged; re-point packets at the fresh disk objects
+    if (!relayout) list.forEach(function (d) { var o = old[d.name]; d.chip = o.chip; d.paths = o.paths; d.traces = o.traces })
     var byName = {}
     list.forEach(function (d) { byName[d.name] = d })
-    this.particles = this.particles.filter(function (p) { return (p.disk = byName[p.disk.name]) })
-    var changed = list.length !== this.disks.length
+    this.packets = relayout ? [] : this.packets.filter(function (p) { return (p.disk = byName[p.disk.name]) })
     this.disks = list
     this.net.rx = (data.net && data.net.rx) || 0
     this.net.tx = (data.net && data.net.tx) || 0
-    if (changed) this.layout()
-    if (this.reducedMotion) this.draw(performance.now())
+    this.netIf = (data.net && data.net.if) || 'eth0'
+    if (relayout) this.layout()
+    if (this.reducedMotion) this.draw()
   }
 
-  Streams.prototype.resize = function () {
+  Board.prototype.resize = function () {
     this.w = Math.max(1, window.innerWidth)
     this.h = Math.max(1, window.innerHeight)
     this.dpr = Math.min(window.devicePixelRatio || 1, 2)
-    this.canvas.width = Math.round(this.w * this.dpr)
-    this.canvas.height = Math.round(this.h * this.dpr)
-    this.dust = []
-    for (var i = 0; i < Math.round((this.w * this.h) / 40000); i++)
-      this.dust.push({ x: Math.random() * this.w, y: Math.random() * this.h, v: 4 + Math.random() * 8, a: 0.08 + Math.random() * 0.18 })
+    this.canvas.width = this.board.width = Math.round(this.w * this.dpr)
+    this.canvas.height = this.board.height = Math.round(this.h * this.dpr)
     this.layout()
-    this.draw(performance.now())
+    this.draw()
   }
 
-  Streams.prototype.layout = function () {
-    this.wellTop = this.h - BOTTOM - WELL_H
-    var n = this.disks.length
-    if (!n) return
-    var slot = Math.min(150, this.w / (n + 1))
-    var ww = Math.max(26, Math.min(70, slot * 0.55))
-    var x0 = this.w / 2 - (slot * (n - 1)) / 2
+  /** Place connector, controller and disk chips; route traces; pre-render the static board. */
+  Board.prototype.layout = function () {
+    var w = this.w, h = this.h, n = this.disks.length
+    var cw = 128, ch = Math.max(150, n * 22 + 50)
+    var cx = Math.round(Math.max(220, w * 0.3)), cy = Math.round(h * 0.56)
+    this.ctrl = { x: cx - cw / 2, y: cy - ch / 2, w: cw, h: ch }
+    // network connector on the left edge: 4 lanes into the controller's left pins
+    this.inlets = []
+    for (var k = 0; k < 4; k++) {
+      var y0 = cy - 27 + k * 18
+      var y1 = cy - 30 + k * 20
+      this.inlets.push(new Path(route(34, y0, this.ctrl.x, y1, rnd(90, 160))))
+    }
+    // disk chips down the right side
+    var chipW = Math.min(150, Math.max(104, w * 0.08))
+    var top = h * 0.17, bot = h * 0.94
+    var slot = n ? (bot - top) / n : 0
+    var chipH = Math.max(30, Math.min(56, slot - 14))
+    var chipX = w - chipW - Math.max(24, w * 0.025)
+    var xa = this.ctrl.x + cw + rnd(36, 60)
+    var pinTop = this.ctrl.y + 26, pinSpan = ch - 52
     var self = this
     this.disks.forEach(function (d, i) {
-      d.x = x0 + i * slot
-      d.w = ww
-      if (d.srcX == null) d.srcX = self.w * (0.2 + 0.6 * Math.random())
+      var y = top + slot * i + (slot - chipH) / 2
+      d.chip = { x: chipX, y: y, w: chipW, h: chipH }
+      d.traces = []
+      d.paths = []
+      for (var j = 0; j < 2; j++) {
+        var outY = pinTop + (pinSpan * (i * 2 + j + 0.5)) / (n * 2)
+        var inY = y + chipH / 2 - 5 + j * 10
+        var pts = route(self.ctrl.x + cw, outY, chipX, inY, xa + j * 4)
+        d.traces.push(pts)
+        // a packet's whole journey: connector -> through the controller -> this trace
+        d.paths.push(j)
+      }
+    })
+    this.renderBoard()
+  }
+
+  /** Full journey for a packet: an inlet lane, straight through the controller, then one of the disk's traces. */
+  Board.prototype.journey = function (d) {
+    var inlet = this.inlets[(Math.random() * this.inlets.length) | 0]
+    var trace = d.traces[(Math.random() * d.traces.length) | 0]
+    return new Path(inlet.pts.concat(trace))
+  }
+
+  Board.prototype.renderBoard = function () {
+    var ctx = this.board.getContext('2d')
+    var w = this.w, h = this.h
+    ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0)
+    ctx.fillStyle = BG
+    ctx.fillRect(0, 0, w, h)
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
+    // decorative traces: short PCB runs with 45-degree bends, ending in vias
+    var count = Math.round((w * h) / 26000)
+    ctx.strokeStyle = COPPER
+    ctx.lineWidth = 1.4
+    for (var i = 0; i < count; i++) {
+      var x = rnd(0, w), y = rnd(0, h), pts = [[x, y]]
+      var dir = Math.random() < 0.5 ? 0 : Math.random() < 0.5 ? 1 : -1 // 0 straight, +-1 diagonal
+      for (var s = 0; s < 2 + ((Math.random() * 4) | 0); s++) {
+        var len = rnd(20, 140)
+        if (dir === 0) x += len
+        else { x += len * 0.7; y += dir * len * 0.7 }
+        pts.push([x, y])
+        dir = dir === 0 ? (Math.random() < 0.5 ? 1 : -1) : 0
+      }
+      stroke(ctx, pts)
+      via(ctx, pts[0][0], pts[0][1], 2.4, COPPER)
+      via(ctx, x, y, 2.4, COPPER)
+    }
+    // a few SMD parts
+    ctx.fillStyle = 'rgba(255,140,47,0.06)'
+    for (var c = 0; c < count / 4; c++) ctx.fillRect(rnd(0, w), rnd(0, h), rnd(6, 14), rnd(3, 6))
+    // live traces (dim base)
+    ctx.strokeStyle = COPPER_LIVE
+    ctx.lineWidth = 2
+    this.inlets.forEach(function (p) { stroke(ctx, p.pts) })
+    this.disks.forEach(function (d) {
+      d.traces.forEach(function (t) {
+        stroke(ctx, t)
+        via(ctx, t[1][0], t[1][1], 3, COPPER_LIVE)
+      })
+    })
+    // network connector
+    var cy = this.ctrl.y + this.ctrl.h / 2
+    ctx.fillStyle = '#141416'
+    ctx.fillRect(0, cy - 44, 34, 88)
+    ctx.strokeStyle = 'rgba(255,140,47,0.35)'
+    ctx.lineWidth = 1
+    ctx.strokeRect(0.5, cy - 43.5, 33, 87)
+    ctx.fillStyle = 'rgba(255,140,47,0.25)'
+    for (var k = 0; k < 4; k++) ctx.fillRect(26, cy - 29 + k * 18, 8, 4)
+    // controller chip
+    var r = this.ctrl
+    ctx.fillStyle = 'rgba(255,140,47,0.30)'
+    for (var py = r.y + 12; py < r.y + r.h - 8; py += 9) {
+      ctx.fillRect(r.x - 6, py, 6, 3)
+      ctx.fillRect(r.x + r.w, py, 6, 3)
+    }
+    for (var px = r.x + 12; px < r.x + r.w - 8; px += 9) {
+      ctx.fillRect(px, r.y - 6, 3, 6)
+      ctx.fillRect(px, r.y + r.h, 3, 6)
+    }
+    ctx.fillStyle = '#121214'
+    ctx.fillRect(r.x, r.y, r.w, r.h)
+    ctx.strokeStyle = 'rgba(255,140,47,0.4)'
+    ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.w - 1, r.h - 1)
+    ctx.beginPath()
+    ctx.arc(r.x + 12, r.y + 12, 3, 0, Math.PI * 2)
+    ctx.fillStyle = 'rgba(255,140,47,0.35)'
+    ctx.fill()
+    ctx.font = '12px ' + this.font
+    ctx.textAlign = 'center'
+    ctx.fillStyle = 'rgba(242,242,242,0.35)'
+    ctx.fillText('ARRAY', r.x + r.w / 2, r.y + r.h / 2 - 4)
+    ctx.font = '10px ' + this.font
+    ctx.fillStyle = 'rgba(242,242,242,0.2)'
+    ctx.fillText('CTRL', r.x + r.w / 2, r.y + r.h / 2 + 12)
+    // disk chip pins (bodies are drawn live)
+    ctx.fillStyle = 'rgba(255,140,47,0.30)'
+    this.disks.forEach(function (d) {
+      var c = d.chip
+      for (var y = c.y + 6; y < c.y + c.h - 3; y += 8) {
+        ctx.fillRect(c.x - 5, y, 5, 3)
+        ctx.fillRect(c.x + c.w, y, 5, 3)
+      }
     })
   }
 
-  Streams.prototype.emit = function (d, dir, hot) {
-    if (this.particles.length >= MAX_PARTICLES) return
-    // each disk's stream comes from its own wandering point on the top edge, so streams branch apart
-    this.particles.push({
-      disk: d,
-      dir: dir, // 1 = write (down), -1 = read (up)
-      sx: d.srcX + gauss() * 70,
-      tx: d.x + gauss() * d.w * 0.28,
-      bend: gauss() * 120,
-      t: 0,
-      life: 1.9 + Math.random() * 1.4,
-      size: hot ? 1.9 : 1.2 + Math.random() * 0.7,
-    })
+  Board.prototype.emit = function (d, dir) {
+    if (this.packets.length >= MAX_PACKETS || !d.traces || !d.traces.length) return
+    var path = this.journey(d)
+    this.packets.push({ disk: d, dir: dir, path: path, s: dir > 0 ? 0 : path.len, speed: SPEED * rnd(0.85, 1.2) })
   }
 
-  Streams.prototype.pathAt = function (p, u) {
-    // cubic bezier from the top inlet to the well mouth (u: 0 = top, 1 = well)
-    var y0 = -8, y1 = this.wellTop - 2
-    var c1x = p.sx + p.bend, c1y = this.h * 0.38
-    var c2x = p.tx - p.bend * 0.4, c2y = this.h * 0.62
-    var m = 1 - u
-    return [
-      m * m * m * p.sx + 3 * m * m * u * c1x + 3 * m * u * u * c2x + u * u * u * p.tx,
-      m * m * m * y0 + 3 * m * m * u * c1y + 3 * m * u * u * c2y + u * u * u * y1,
-    ]
-  }
-
-  Streams.prototype.tick = function (t) {
+  Board.prototype.tick = function (t) {
     var dt = Math.min(100, t - this.last)
     this.last = t
     this.acc += dt
@@ -188,138 +324,128 @@
     this.acc = 0
     var k = Math.min(1, s * 2.5)
     var self = this
-    // hover: the well under the cursor (within the lower band)
     this.hovered = -1
-    if (this.my > this.wellTop - 90)
-      this.disks.forEach(function (d, i) { if (Math.abs(self.mx - d.x) < Math.max(d.w, 40)) self.hovered = i })
+    this.disks.forEach(function (d, i) {
+      var c = d.chip
+      if (c && self.mx >= c.x - 10 && self.mx <= c.x + c.w + 10 && self.my >= c.y - 6 && self.my <= c.y + c.h + 6) self.hovered = i
+    })
     this.disks.forEach(function (d, i) {
       d.rr += (d.read - d.rr) * k
       d.rw += (d.write - d.rw) * k
       d.shownUsed += ((d.used || 0) - d.shownUsed) * k
-      d.glow += (Math.min(1, (pps(d.rr) + pps(d.rw)) / 30) - d.glow) * k
+      d.glow += (Math.min(1, (pps(d.rr) + pps(d.rw)) / 16) - d.glow) * k
       d.hover += ((i === self.hovered ? 1 : 0) - d.hover) * Math.min(1, s * 8)
-      d.srcX += gauss() * 30 * s // wander
-      d.srcX = Math.max(self.w * 0.08, Math.min(self.w * 0.92, d.srcX))
       d.accW += pps(d.rw) * s
       d.accR += pps(d.rr) * s
-      while (d.accW >= 1) { d.accW -= 1; self.emit(d, 1, i === self.hovered) }
-      while (d.accR >= 1) { d.accR -= 1; self.emit(d, -1, i === self.hovered) }
+      while (d.accW >= 1) { d.accW -= 1; self.emit(d, 1) }
+      while (d.accR >= 1) { d.accR -= 1; self.emit(d, -1) }
     })
-    for (var j = this.particles.length - 1; j >= 0; j--) {
-      var p = this.particles[j]
-      p.t += s / p.life
-      if (p.t >= 1) this.particles.splice(j, 1)
+    for (var j = this.packets.length - 1; j >= 0; j--) {
+      var p = this.packets[j]
+      p.s += p.dir * p.speed * s
+      if (p.s > p.path.len || p.s < 0) this.packets.splice(j, 1)
     }
-    this.net.srx += (this.net.rx - this.net.srx) * k
-    this.net.stx += (this.net.tx - this.net.stx) * k
-    for (var q = 0; q < this.dust.length; q++) {
-      var m = this.dust[q]
-      m.y += m.v * s
-      if (m.y > this.h) { m.y = -2; m.x = Math.random() * this.w }
-    }
-    this.draw(t)
+    this.net.s += (Math.min(1, Math.log2(1 + (this.net.rx + this.net.tx) / 100000) / 11) - this.net.s) * k
+    this.draw()
   }
 
-  Streams.prototype.draw = function () {
+  Board.prototype.draw = function () {
     var ctx = this.ctx
-    if (!ctx) return
+    if (!ctx || !this.ctrl) return
+    ctx.setTransform(1, 0, 0, 1, 0, 0)
+    ctx.drawImage(this.board, 0, 0)
     ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0)
-    ctx.fillStyle = BG
-    ctx.fillRect(0, 0, this.w, this.h)
-
-    // faint drifting dust so idle is not dead
-    for (var q = 0; q < this.dust.length; q++) {
-      var m = this.dust[q]
-      ctx.fillStyle = rgba(ORANGE, m.a * 0.6)
-      ctx.fillRect(m.x, m.y, 1.2, 1.2)
-    }
-
-    // network glow along the top edge
-    var net = Math.min(1, Math.log2(1 + (this.net.srx + this.net.stx) / 100000) / 12)
-    if (net > 0.01) {
-      var g = ctx.createLinearGradient(0, 0, 0, 90)
-      g.addColorStop(0, rgba(ORANGE, 0.35 * net))
-      g.addColorStop(1, rgba(RED, 0))
-      ctx.fillStyle = g
-      ctx.fillRect(0, 0, this.w, 90)
-    }
-
-    // particles with short trails
     ctx.lineCap = 'round'
-    for (var j = 0; j < this.particles.length; j++) {
-      var p = this.particles[j]
-      var u = p.dir > 0 ? p.t : 1 - p.t
-      var u0 = Math.max(0, Math.min(1, u - 0.03 * p.dir))
-      var a = this.pathAt(p, u), b = this.pathAt(p, u0)
-      var fade = Math.min(1, p.t * 6, (1 - p.t) * 5)
-      var hot = p.disk.hover
-      var col = p.dir > 0 ? mix(ORANGE, RED, u) : mix(RED, PALE, 1 - u)
-      ctx.strokeStyle = rgba(col, (0.55 + 0.45 * hot) * fade)
-      ctx.lineWidth = p.size * (1 + hot * 0.6)
-      ctx.beginPath()
-      ctx.moveTo(b[0], b[1])
-      ctx.lineTo(a[0], a[1])
-      ctx.stroke()
+    ctx.lineJoin = 'round'
+    // network lanes glow with real traffic
+    if (this.net.s > 0.02) {
+      ctx.strokeStyle = rgba(ORANGE, 0.45 * this.net.s)
+      ctx.lineWidth = 2
+      this.inlets.forEach(function (p) { stroke(ctx, p.pts) })
     }
-
-    // wells
-    var top = this.wellTop
-    ctx.font = '11px ' + this.font
-    ctx.textAlign = 'center'
+    // active disk traces glow
     this.disks.forEach(function (d) {
-      var x = d.x - d.w / 2
-      var dim = d.spundown ? 0.35 : 1
-      // activity glow above the mouth
-      if (d.glow > 0.02 || d.hover > 0.02) {
-        var gg = ctx.createRadialGradient(d.x, top, 0, d.x, top, d.w * 1.4)
-        gg.addColorStop(0, rgba(ORANGE, 0.35 * Math.max(d.glow, d.hover * 0.6)))
-        gg.addColorStop(1, rgba(ORANGE, 0))
-        ctx.fillStyle = gg
-        ctx.fillRect(d.x - d.w * 1.5, top - d.w * 1.4, d.w * 3, d.w * 2)
-      }
-      // body
-      ctx.fillStyle = 'rgba(20,20,22,0.85)'
-      ctx.fillRect(x, top, d.w, WELL_H)
-      if (d.type === 'parity') {
-        // parity has no filesystem: draw it as a red-hatched, always-full disk
-        ctx.save()
+      var g = Math.max(d.glow, d.hover * 0.7)
+      if (g < 0.02 || !d.traces) return
+      ctx.lineWidth = 5
+      ctx.strokeStyle = rgba(ORANGE, 0.08 * g)
+      d.traces.forEach(function (t) { stroke(ctx, t) })
+      ctx.lineWidth = 2
+      ctx.strokeStyle = rgba(d.type === 'parity' ? RED : ORANGE, 0.55 * g)
+      d.traces.forEach(function (t) { stroke(ctx, t) })
+    })
+    // packets: bright head with a fading tail behind it
+    for (var j = 0; j < this.packets.length; j++) {
+      var p = this.packets[j]
+      var col = p.dir > 0 ? (p.disk.type === 'parity' ? RED : ORANGE) : PALE
+      var hot = 1 + p.disk.hover * 0.5
+      for (var q = 4; q >= 0; q--) {
+        var pt = p.path.at(p.s - p.dir * q * 7)
+        ctx.fillStyle = rgba(col, (q ? 0.5 - q * 0.1 : 1) * 0.9)
         ctx.beginPath()
-        ctx.rect(x, top, d.w, WELL_H)
-        ctx.clip()
-        ctx.strokeStyle = rgba(RED, 0.28 * dim)
-        ctx.lineWidth = 1
-        for (var hx = -WELL_H; hx < d.w; hx += 7) {
-          ctx.beginPath()
-          ctx.moveTo(x + hx, top + WELL_H)
-          ctx.lineTo(x + hx + WELL_H, top)
-          ctx.stroke()
-        }
-        ctx.restore()
-      } else {
-        // fill level = real used %
-        var fh = WELL_H * Math.max(0, Math.min(1, d.shownUsed))
-        var fg = ctx.createLinearGradient(0, top + WELL_H, 0, top)
-        fg.addColorStop(0, rgba(RED, 0.75 * dim))
-        fg.addColorStop(1, rgba(ORANGE, 0.75 * dim))
-        ctx.fillStyle = fg
-        ctx.fillRect(x, top + WELL_H - fh, d.w, fh)
+        ctx.arc(pt[0], pt[1], (q ? 1.6 : 2.4) * hot, 0, Math.PI * 2)
+        ctx.fill()
       }
-      // rim
-      ctx.strokeStyle = d.type === 'parity' ? rgba(RED, 0.9 * dim) : rgba(ORANGE, (0.35 + 0.5 * Math.max(d.glow, d.hover)) * dim)
+    }
+    // controller activity LED
+    var busy = this.packets.length ? Math.min(1, this.packets.length / 40) : 0
+    ctx.fillStyle = rgba(ORANGE, 0.25 + 0.75 * busy)
+    ctx.beginPath()
+    ctx.arc(this.ctrl.x + 12, this.ctrl.y + 12, 3, 0, Math.PI * 2)
+    ctx.fill()
+    // connector label
+    ctx.font = '10px ' + this.font
+    ctx.textAlign = 'center'
+    ctx.fillStyle = rgba([242, 242, 242], 0.3 + 0.5 * this.net.s)
+    ctx.fillText(this.netIf || 'eth0', 17, this.ctrl.y + this.ctrl.h / 2 + 58)
+    // disk chips
+    var self = this
+    this.disks.forEach(function (d) {
+      var c = d.chip
+      if (!c) return
+      var dim = d.spundown ? 0.4 : 1
+      var accent = d.type === 'parity' ? RED : ORANGE
+      ctx.fillStyle = '#121214'
+      ctx.fillRect(c.x, c.y, c.w, c.h)
+      // usage bar along the bottom of the chip (parity: hatched, it has no filesystem)
+      var barY = c.y + c.h - 8, barW = c.w - 16
+      ctx.fillStyle = 'rgba(255,255,255,0.06)'
+      ctx.fillRect(c.x + 8, barY, barW, 3)
+      if (d.type === 'parity') {
+        ctx.fillStyle = rgba(RED, 0.5 * dim)
+        for (var hx = 0; hx < barW; hx += 6) ctx.fillRect(c.x + 8 + hx, barY, 3, 3)
+      } else {
+        var bg = ctx.createLinearGradient(c.x + 8, 0, c.x + 8 + barW, 0)
+        bg.addColorStop(0, rgba(RED, 0.9 * dim))
+        bg.addColorStop(1, rgba(ORANGE, 0.9 * dim))
+        ctx.fillStyle = bg
+        ctx.fillRect(c.x + 8, barY, barW * Math.max(0, Math.min(1, d.shownUsed)), 3)
+      }
+      ctx.strokeStyle = rgba(accent, (0.35 + 0.55 * Math.max(d.glow, d.hover)) * dim)
       ctx.lineWidth = d.hover > 0.5 ? 1.6 : 1
-      ctx.strokeRect(x + 0.5, top + 0.5, d.w - 1, WELL_H - 1)
+      ctx.strokeRect(c.x + 0.5, c.y + 0.5, c.w - 1, c.h - 1)
       if (!d.ok) {
         ctx.strokeStyle = 'rgba(240,0,12,0.95)'
-        ctx.strokeRect(x - 2, top - 2, d.w + 4, WELL_H + 4)
+        ctx.strokeRect(c.x - 3, c.y - 3, c.w + 6, c.h + 6)
       }
-      // label
-      ctx.fillStyle = rgba([242, 242, 242], (0.45 + 0.5 * d.hover) * (d.spundown ? 0.6 : 1))
-      ctx.fillText(d.name, d.x, top + WELL_H + 14)
+      // activity LED + label
+      ctx.fillStyle = d.spundown ? 'rgba(120,120,120,0.4)' : rgba(accent, 0.3 + 0.7 * d.glow)
+      ctx.beginPath()
+      ctx.arc(c.x + 10, c.y + 10, 2.5, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.font = '11px ' + self.font
+      ctx.textAlign = 'left'
+      ctx.fillStyle = rgba([242, 242, 242], (0.55 + 0.45 * d.hover) * (d.spundown ? 0.6 : 1))
+      ctx.fillText(d.name, c.x + 18, c.y + 14)
+      if (c.h >= 40) {
+        ctx.font = '10px ' + self.font
+        ctx.fillStyle = 'rgba(242,242,242,0.35)'
+        ctx.fillText(d.spundown ? 'standby' : d.used != null ? Math.round(d.used * 100) + '%' : 'parity', c.x + 18, c.y + 27)
+      }
     })
-
-    // hover readout
+    // hover readout, to the left of the chip
     var h = this.disks[this.hovered]
-    if (h && h.hover > 0.3) {
+    if (h && h.hover > 0.3 && h.chip) {
       var lines = [
         h.name + (h.spundown ? '  (spun down)' : ''),
         'read  ' + human(h.read) + '/s',
@@ -333,10 +459,10 @@
       lines.forEach(function (l) { bw = Math.max(bw, ctx.measureText(l).width) })
       bw += 20
       var bh = lines.length * 16 + 12
-      var bx = Math.max(6, Math.min(this.w - bw - 6, h.x - bw / 2))
-      var by = top - bh - 14
+      var bx = h.chip.x - bw - 18
+      var by = Math.max(6, Math.min(this.h - bh - 6, h.chip.y + h.chip.h / 2 - bh / 2))
       ctx.globalAlpha = Math.min(1, (h.hover - 0.3) * 2)
-      ctx.fillStyle = 'rgba(14,14,16,0.92)'
+      ctx.fillStyle = 'rgba(14,14,16,0.94)'
       ctx.fillRect(bx, by, bw, bh)
       var lg = ctx.createLinearGradient(0, by, 0, by + bh)
       lg.addColorStop(0, '#e22828')
@@ -353,7 +479,7 @@
 
   function start() {
     if (!document.body || document.querySelector('.starfield-canvas')) return
-    new Streams()
+    new Board()
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start)
   else start()
