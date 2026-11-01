@@ -1,7 +1,7 @@
 <?xml version='1.0' standalone='yes'?>
 <!DOCTYPE PLUGIN [
 <!ENTITY name "starfield">
-<!ENTITY version "2026.10.31.2315">
+<!ENTITY version "2026.10.31.2320">
 <!ENTITY emhttp "/usr/local/emhttp/plugins/&name;">
 ]>
 <PLUGIN name="&name;" author="quentin" version="&version;" min="7.0.0" icon="star">
@@ -519,13 +519,13 @@ svg text { font-family: var(--nb-font-body) !important; }
 mkdir -p /usr/local/emhttp/plugins/starfield/fonts
 cp /boot/config/plugins/starfield/fonts/*.woff2 /usr/local/emhttp/plugins/starfield/fonts/ 2>/dev/null
 chmod -R a+rX /usr/local/emhttp/plugins/starfield
-rm -f /usr/local/emhttp/plugins/starfield/starfield.css
 echo "starfield: $(ls /usr/local/emhttp/plugins/starfield/fonts | wc -l) fonts installed"
 </INLINE>
 </FILE>
 <FILE Run="/bin/bash" Method="remove">
 <INLINE>
-rm -rf /usr/local/emhttp/plugins/starfield /boot/config/plugins/starfield
+# fonts on the flash are kept so a reinstall works
+rm -rf /usr/local/emhttp/plugins/starfield
 echo "starfield removed"
 </INLINE>
 </FILE>

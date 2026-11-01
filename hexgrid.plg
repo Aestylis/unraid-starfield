@@ -1,0 +1,622 @@
+<?xml version='1.0' standalone='yes'?>
+<!DOCTYPE PLUGIN [
+<!ENTITY name "hexgrid">
+<!ENTITY version "2026.10.31.2320">
+<!ENTITY emhttp "/usr/local/emhttp/plugins/&name;">
+]>
+<PLUGIN name="&name;" author="quentin" version="&version;" min="7.0.0" icon="star">
+<CHANGES>
+###&version;
+- Ember theme (orange/grey/black, Orbitron/Exo 2) with an animated hex grid background
+</CHANGES>
+<FILE Name="&emhttp;/HexgridHeader.page">
+<INLINE>
+<![CDATA[
+Menu="Buttons:199"
+Link="nav-starfield"
+---
+<link type="text/css" rel="stylesheet" href="<?autov('/plugins/hexgrid/ember.css')?>">
+<script src="<?autov('/plugins/hexgrid/hexgrid.js')?>"></script>
+]]>
+</INLINE>
+</FILE>
+<FILE Name="&emhttp;/ember.css">
+<INLINE>
+<![CDATA[
+/* Ember theme for the Unraid webGui (orange / grey / black), generated from nebula.css by make-ember.py.
+ * Unraid themes are CSS variables on :root; `html:root` outranks them, and this file loads in <head> after the theme,
+ * so there is no flash of the old colours. Surfaces are translucent so the page-wide hex grid shows through. */
+@font-face { font-family: 'Orbitron'; font-weight: 500; font-display: swap; src: url('fonts/orbitron-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Orbitron'; font-weight: 700; font-display: swap; src: url('fonts/orbitron-latin-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Exo 2'; font-weight: 400; font-display: swap; src: url('fonts/exo-2-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Exo 2'; font-weight: 600; font-display: swap; src: url('fonts/exo-2-latin-600-normal.woff2') format('woff2'); }
+
+html:root {
+  /* nebula tokens */
+  --nb-bg: #0a0a0a;
+  --nb-bg-elev: #161616;
+  --nb-panel: rgba(30, 30, 30, 0.62);
+  --nb-panel-solid: rgba(22, 22, 22, 0.92);
+  --nb-panel-border: rgba(255, 140, 47, 0.45);
+  --nb-hairline: rgba(255, 140, 47, 0.38);
+  --nb-accent: #ff8c2f;
+  --nb-accent-deep: #d9480f;
+  --nb-accent-glow: rgba(255, 140, 47, 0.55);
+  --nb-text: #f2ede8;
+  --nb-text-dim: #a8a29e;
+  --nb-link: #ffb36b;
+  --nb-font-display: 'Orbitron', sans-serif;
+  --nb-font-body: 'Exo 2', sans-serif;
+  --nb-chamfer: 10px;
+  --nb-text-glow: 0 0 12px var(--nb-accent-glow);
+
+  /* Unraid theme variables -> nebula */
+  --text-color: var(--nb-text);
+  --blockquote-text-color: var(--nb-text);
+  --alt-text-color: var(--nb-text-dim);
+  --disabled-text-color: #6b6560;
+  --link-text-color: var(--nb-link);
+
+  --background-color: var(--nb-bg);
+  --opac-background-color: rgba(8, 8, 8, 0.88);
+  --mild-background-color: var(--nb-panel);
+  --usage-bar-background-color: rgba(255, 140, 47, 0.14);
+  --usage-bar-used-background-color: var(--nb-accent);
+  --usage-disk-background-color: rgba(255, 140, 47, 0.14);
+  --radio-background-color: rgba(255, 140, 47, 0.2);
+  --dashboard-background-color: var(--nb-panel);
+  --dashboard-icon-color: var(--nb-accent);
+
+  --border-color: var(--nb-panel-border);
+  --input-border-color: rgba(255, 140, 47, 0.6);
+  --textarea-border-color: var(--nb-hairline);
+  --inverse-border-color: var(--nb-hairline);
+  --table-border-color: var(--nb-hairline);
+  --table-background-color: rgba(20, 20, 20, 0.55);
+  --table-header-background-color: var(--nb-panel);
+  --hover-table-row-background-color: rgba(255, 140, 47, 0.09);
+
+  --footer-text: var(--nb-text-dim);
+  --footer-background-color: rgba(8, 8, 8, 0.82);
+  --small-shadow: 0 0 6px var(--nb-accent-glow);
+  --hr-color: var(--nb-hairline);
+  --checkbox-color: var(--nb-accent);
+  --checkbox-hover-color: #ffad66;
+
+  --brand-orange: var(--nb-accent);
+  --brand-red: var(--nb-accent-deep);
+
+  --header-text-color: var(--nb-text);
+  --header-background-color: transparent;
+  --custom-header-background-color: transparent;
+  --banner-gradient: none;
+  --title-header-background-color: var(--nb-panel);
+
+  --scrollbar-color: rgba(255, 140, 47, 0.45);
+  --scrollbar-hover-color: var(--nb-accent);
+
+  --button-text-color: var(--nb-text);
+  --hover-button-border: var(--nb-accent);
+  --hover-button-text-color: #fff;
+
+  --focus-input-bg-color: rgba(30, 30, 30, 0.85);
+  --shade-bg-color: rgba(20, 20, 20, 0.7);
+  --dynamix-filetree-bg-color: var(--nb-bg-elev);
+
+  /* tablesorter (Plugins, Docker, Unassigned Devices tables) */
+  --dynamix-tablesorter-thead-row-border-color: var(--nb-hairline);
+  --dynamix-tablesorter-thead-th-text-color: var(--nb-text);
+  --dynamix-tablesorter-thead-th-bg-color: var(--nb-panel);
+  --dynamix-tablesorter-tbody-row-alt-bg-color: rgba(20, 20, 20, 0.55);
+  --dynamix-tablesorter-tbody-row-bg-color: transparent;
+  --dynamix-tablesorter-tbody-row-border-color: var(--nb-hairline);
+  --dynamix-select-box-shadow: 0 2px 0 var(--nb-accent), inset 0 -1px var(--nb-bg);
+  --dynamix-select-disabled-bg-color: rgba(20, 20, 20, 0.7);
+  --dynamix-tooltipster-sidetip-bg-from: var(--nb-bg-elev);
+  --dynamix-tooltipster-sidetip-bg-to: #242424;
+  --dynamix-tooltipster-sidetip-arrow-bg-color: #242424;
+  --dynamix-tooltipster-sidetip-box-border-color: var(--nb-accent);
+  --dynamix-awesomplete-text-color: var(--nb-text);
+  --dynamix-awesomplete-list-bg-color: var(--nb-panel-solid);
+  --dynamix-awesomplete-list-bg-from-color: var(--nb-panel-solid);
+  --dynamix-awesomplete-list-before-bg-color: var(--nb-panel-solid);
+  --dynamix-awesomplete-list-item-hover-bg-color: rgba(255, 140, 47, 0.25);
+  --dynamix-awesomplete-list-item-hover-text-color: var(--nb-text);
+  --dynamix-awesomplete-list-item-selected-bg-color: var(--nb-accent-deep);
+  --dynamix-awesomplete-mark-hover-bg-color: var(--nb-accent);
+
+  /* Community Apps */
+  --template-background: var(--nb-panel);
+  --template-hover-background: rgba(54, 40, 30, 0.75);
+  --template-favourite: rgba(255, 140, 47, 0.22);
+  --a-color: var(--nb-link);
+  --sidebar-background: rgba(8, 8, 8, 0.8);
+  --sidebar-text: var(--nb-text);
+  --support-popup-text: var(--nb-text);
+  --support-popup-background: var(--nb-panel-solid);
+  --unraid-66-color: var(--nb-accent);
+  --ca-legacy-background-color: transparent;
+  --tooltipster-content: var(--nb-text);
+  --chart-grid: var(--nb-hairline);
+}
+
+/* Unraid declares these on `.Theme--black:root` (specificity 0,2,0); `html:root:root` (0,2,1) beats it. */
+html:root:root {
+  --dynamix-jquery-ui-button-text-color: var(--nb-text);
+  --dynamix-jquery-ui-button-background-start: var(--nb-accent-deep);
+  --dynamix-jquery-ui-button-background-end: var(--nb-accent);
+  --dynamix-jquery-ui-button-hover-color: #fff;
+  --dynamix-jquery-ui-border-color: var(--nb-panel-border);
+  --dynamix-jquery-ui-header-background: var(--nb-panel);
+  --dynamix-jquery-ui-header-color: var(--nb-text);
+  --dynamix-jquery-ui-content-background: var(--nb-panel-solid);
+  --dynamix-jquery-ui-content-color: var(--nb-text);
+  --dynamix-jquery-ui-active-background: rgba(255, 140, 47, 0.2);
+  --dynamix-jquery-ui-dropcontainer-background: var(--nb-panel-solid);
+  --dynamix-jquery-ui-disabled-background: rgba(20, 20, 20, 0.7);
+  --dynamix-jquery-ui-text-color: var(--nb-text);
+}
+
+/* page: near-black with a faint ember glow; the hex grid canvas sits behind everything */
+html:root body {
+  background-color: var(--nb-bg);
+  background-image: radial-gradient(ellipse at 15% -10%, #2a1a0c 0%, #0e0c0b 45%, transparent 75%);
+  background-attachment: fixed;
+  font-family: var(--nb-font-body);
+}
+html:root body input,
+html:root body select,
+html:root body textarea,
+html:root body button {
+  font-family: var(--nb-font-body);
+}
+.starfield-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* header: banner image off, stars show through */
+#header {
+  background-image: none !important;
+  background-color: transparent !important;
+  color: var(--nb-text);
+}
+.nav-starfield { display: none !important; }
+
+/* nav bar: glass strip with a hairline, Orbitron labels */
+.nav-tile {
+  background-color: rgba(12, 12, 12, 0.72) !important;
+  backdrop-filter: blur(6px);
+  border-top: 1px solid var(--nb-hairline);
+  border-bottom: 1px solid var(--nb-hairline);
+  font-family: var(--nb-font-display);
+  font-size: 1.1rem;
+}
+.nav-tile .nav-item a { color: var(--nb-text-dim); }
+.nav-tile .nav-item a:hover,
+.nav-tile .nav-item.active a {
+  color: var(--nb-text);
+  text-shadow: var(--nb-text-glow);
+}
+.nav-tile .nav-item.active a { box-shadow: inset 0 -2px 0 var(--nb-accent); }
+
+/* section title bars: chamfered holo panels with a glowing Orbitron label */
+div.title {
+  background-color: var(--nb-panel);
+  backdrop-filter: blur(6px);
+  border-bottom: none;
+  clip-path: polygon(0 0, calc(100% - var(--nb-chamfer)) 0, 100% var(--nb-chamfer), 100% 100%, var(--nb-chamfer) 100%, 0 calc(100% - var(--nb-chamfer)));
+  outline: 1px solid var(--nb-panel-border);
+  outline-offset: -1px;
+  font-family: var(--nb-font-display);
+  font-size: 1.25rem;
+  letter-spacing: 0.08em;
+  color: var(--nb-text);
+  text-shadow: var(--nb-text-glow);
+}
+
+/* tables and panels: translucent so the stars come through */
+table thead tr,
+table.disk_status thead tr,
+table.share_status thead tr {
+  background-color: var(--nb-panel) !important;
+  font-family: var(--nb-font-display);
+  letter-spacing: 0.05em;
+}
+
+/* buttons: violet frame, glow on hover */
+input[type="button"],
+input[type="reset"],
+input[type="submit"],
+button:not([role="tab"]),
+a.button {
+  font-family: var(--nb-font-display) !important;
+  letter-spacing: 0.06em;
+}
+input[type="button"]:hover,
+input[type="reset"]:hover,
+input[type="submit"]:hover,
+button:not([role="tab"]):hover,
+a.button:hover {
+  box-shadow: 0 0 12px var(--nb-accent-glow);
+}
+
+/* inputs */
+input[type="text"],
+input[type="password"],
+input[type="number"],
+input[type="email"],
+select,
+textarea {
+  color: var(--nb-text);
+}
+input:focus,
+select:focus,
+textarea:focus {
+  box-shadow: 0 0 8px var(--nb-accent-glow);
+}
+
+/* tabs */
+.tabs button[role="tab"][aria-selected="true"] {
+  border-color: var(--nb-accent);
+  text-shadow: var(--nb-text-glow);
+}
+.tabs button[role="tab"] { font-family: var(--nb-font-display); }
+
+/* toggle switches (jquery.switchbutton hardcodes blue/grey) */
+.switch-button-label.on { color: var(--nb-accent) !important; }
+.switch-button-label { color: var(--nb-text-dim); }
+.switch-button-background {
+  background-color: rgba(255, 140, 47, 0.12) !important;
+  border-color: var(--nb-hairline) !important;
+}
+.switch-button-background.checked {
+  background-color: var(--nb-accent-deep) !important;
+  box-shadow: 0 0 8px var(--nb-accent-glow);
+}
+.switch-button-button {
+  background-color: var(--nb-text) !important;
+  border-color: var(--nb-panel-border) !important;
+}
+
+/* Community Apps: cards as holo panels, search box glass */
+.ca_holder, .ca_template, div.ca_holderDocker, div.ca_holderPlugin {
+  backdrop-filter: blur(6px);
+  border-color: var(--nb-panel-border) !important;
+}
+.searchArea input, input#searchBox, input.searchBox {
+  background-color: var(--nb-panel) !important;
+  color: var(--nb-text) !important;
+  border: 1px solid var(--nb-hairline) !important;
+}
+img.ca_displayIcon, img.popupIcon { background-color: rgba(255, 140, 47, 0.14); }
+
+/* catch-all for tables whose header/stripe colours are hardcoded (Main boot table, Unassigned Devices, ...) */
+#displaybox table:not(.dashboard) thead tr:first-child > td,
+#displaybox table:not(.dashboard) thead tr > th {
+  background-color: var(--nb-panel) !important;
+}
+#displaybox table:not(.dashboard) tbody tr:nth-child(even) {
+  background-color: rgba(20, 20, 20, 0.55) !important;
+}
+#displaybox table:not(.dashboard) tbody tr:nth-child(odd) {
+  background-color: transparent;
+}
+
+/* header logo: keep Unraid orange, add an ember glow (it lives in a web component) */
+#header unraid-header-os-version {
+  filter: drop-shadow(0 0 6px rgba(255, 140, 47, 0.45));
+}
+
+/* Stats charts (Highcharts 2 SVG: colours are presentation attributes, which CSS properties override) */
+svg stop[stop-color="rgb(96,96,96)"] { stop-color: rgb(42, 42, 42); }
+svg stop[stop-color="rgb(16,16,16)"] { stop-color: rgb(10, 10, 10); }
+svg [fill="#E68A00" i] { fill: #ff8c2f; }
+svg [stroke="#E68A00" i] { stroke: #ff8c2f; }
+svg [fill="#EDC240" i] { fill: #9e9e9e; }
+svg [stroke="#EDC240" i] { stroke: #9e9e9e; }
+svg [fill="#BDE5F8" i] { fill: #ffd2a8; }
+svg [stroke="#BDE5F8" i] { stroke: #ffd2a8; }
+svg [fill="#4DA74D" i] { fill: #5cff8a; }
+svg [stroke="#4DA74D" i] { stroke: #5cff8a; }
+svg [stroke="#C0C0C0" i] { stroke: rgba(255, 140, 47, 0.22); }
+svg text { font-family: var(--nb-font-body) !important; }
+
+/* footer: glass strip */
+#footer {
+  backdrop-filter: blur(6px);
+  border-top: 1px solid var(--nb-hairline);
+}
+
+/* popups/dialogs stay solid so text over them is readable */
+.sweet-alert,
+.ui-dialog,
+.ui-dialog .ui-dialog-content {
+  background-color: var(--nb-panel-solid) !important;
+  color: var(--nb-text) !important;
+  border: 1px solid var(--nb-panel-border);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  html:root { --nb-panel: var(--nb-panel-solid); }
+}
+]]>
+</INLINE>
+</FILE>
+<FILE Name="&emhttp;/hexgrid.js">
+<INLINE>
+<![CDATA[
+/* Unraid page hex grid (Ember theme).
+ * A pointy-top hex grid fixed behind the whole page. Each hex's colour comes from a slow gradient field of black, grey
+ * and orange drifting across the screen, mixed with the hex's own fixed tint. Every so often two neighbouring hexes
+ * slide past each other and swap places (carrying their tint with them). Hexes near the cursor warm up and glow.
+ * Redraws at ~24 fps; requestAnimationFrame pauses it in hidden tabs; prefers-reduced-motion draws one still frame.
+ */
+(function () {
+  'use strict'
+
+  var R = 30 // hex circumradius (px)
+  var GAP = 1.6 // dark seam between hexes (px)
+  var FRAME_MS = 1000 / 24
+  var SWAP_EVERY_MS = 260 // start a new swap this often
+  var SWAP_MS = 900 // how long a swap takes
+  var MAX_SWAPS = 6
+  var HOVER_RADIUS = 160
+  var BG = '#050505'
+  // gradient stops: black -> grey -> ember -> orange
+  var STOPS = [
+    [0.0, [10, 10, 10]],
+    [0.42, [30, 30, 30]],
+    [0.66, [58, 56, 54]],
+    [0.84, [128, 62, 18]],
+    [1.0, [255, 140, 47]],
+  ]
+
+  function gradient(v) {
+    v = v < 0 ? 0 : v > 1 ? 1 : v
+    for (var i = 1; i < STOPS.length; i++) {
+      if (v <= STOPS[i][0]) {
+        var a = STOPS[i - 1], b = STOPS[i]
+        var t = (v - a[0]) / (b[0] - a[0])
+        return [a[1][0] + (b[1][0] - a[1][0]) * t, a[1][1] + (b[1][1] - a[1][1]) * t, a[1][2] + (b[1][2] - a[1][2]) * t]
+      }
+    }
+    return STOPS[STOPS.length - 1][1]
+  }
+
+  function ease(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+  }
+
+  function HexGrid() {
+    var self = this
+    this.reducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+    this.canvas = document.createElement('canvas')
+    this.canvas.className = 'starfield-canvas'
+    this.canvas.setAttribute('aria-hidden', 'true')
+    document.body.insertBefore(this.canvas, document.body.firstChild)
+    this.ctx = this.canvas.getContext('2d')
+    if (!this.ctx) return
+    this.w = this.h = 0
+    this.dpr = 1
+    this.acc = 0
+    this.sinceSwap = 0
+    this.swaps = []
+    this.mx = this.my = -1e6
+    this.hexPath = this.makeHexPath(R - GAP / 2)
+    this.resize()
+    var timer
+    window.addEventListener('resize', function () {
+      clearTimeout(timer)
+      timer = setTimeout(function () { self.resize() }, 150)
+    })
+    if (this.reducedMotion) return
+    window.addEventListener('pointermove', function (e) {
+      self.mx = e.clientX
+      self.my = e.clientY
+    })
+    var leave = function () { self.mx = self.my = -1e6 }
+    document.addEventListener('mouseleave', leave)
+    window.addEventListener('blur', leave)
+    window.addEventListener('pointerup', function (e) { if (e.pointerType !== 'mouse') leave() })
+    this.last = performance.now()
+    requestAnimationFrame(function loop(t) { self.tick(t); requestAnimationFrame(loop) })
+  }
+
+  HexGrid.prototype.makeHexPath = function (r) {
+    var p = new Path2D()
+    for (var i = 0; i < 6; i++) {
+      var a = (Math.PI / 180) * (60 * i - 30)
+      var x = r * Math.cos(a), y = r * Math.sin(a)
+      if (i === 0) p.moveTo(x, y)
+      else p.lineTo(x, y)
+    }
+    p.closePath()
+    return p
+  }
+
+  /** Build the slot grid for the viewport; each slot holds one tile (a tile = a fixed personal tint). */
+  HexGrid.prototype.resize = function () {
+    var w = Math.max(1, window.innerWidth)
+    var h = Math.max(1, window.innerHeight)
+    this.w = w
+    this.h = h
+    this.dpr = Math.min(window.devicePixelRatio || 1, 2)
+    this.canvas.width = Math.round(w * this.dpr)
+    this.canvas.height = Math.round(h * this.dpr)
+    var hw = Math.sqrt(3) * R // horizontal spacing
+    var vh = 1.5 * R // vertical spacing
+    this.cols = Math.ceil(w / hw) + 2
+    this.rows = Math.ceil(h / vh) + 2
+    this.slots = [] // slots[i] = {x, y, col, row, tile}
+    this.tiles = [] // tiles[j] = {tint, warm, slot}
+    for (var r = 0; r < this.rows; r++) {
+      for (var c = 0; c < this.cols; c++) {
+        var i = this.slots.length
+        this.slots.push({ x: (c - 0.5) * hw + (r & 1 ? hw / 2 : 0), y: (r - 0.5) * vh, col: c, row: r, tile: i })
+        // personal tint: mostly dark, a few run hot
+        var t = Math.random()
+        this.tiles.push({ tint: t < 0.08 ? 0.85 + Math.random() * 0.15 : Math.random() * 0.55, hover: 0, slot: i })
+      }
+    }
+    this.swaps = []
+    this.draw(performance.now())
+  }
+
+  HexGrid.prototype.slotAt = function (col, row) {
+    if (col < 0 || row < 0 || col >= this.cols || row >= this.rows) return -1
+    return row * this.cols + col
+  }
+
+  /** Neighbours of a pointy-top, odd-row-shifted grid. */
+  HexGrid.prototype.neighbours = function (s) {
+    var c = s.col, r = s.row, odd = r & 1
+    var d = odd ? [[1, 0], [-1, 0], [0, -1], [1, -1], [0, 1], [1, 1]] : [[1, 0], [-1, 0], [-1, -1], [0, -1], [-1, 1], [0, 1]]
+    var out = []
+    for (var i = 0; i < 6; i++) {
+      var n = this.slotAt(c + d[i][0], r + d[i][1])
+      if (n >= 0) out.push(n)
+    }
+    return out
+  }
+
+  HexGrid.prototype.startSwap = function () {
+    if (this.swaps.length >= MAX_SWAPS) return
+    var busy = {}
+    this.swaps.forEach(function (sw) { busy[sw.a] = busy[sw.b] = 1 })
+    for (var tries = 0; tries < 8; tries++) {
+      var a = (Math.random() * this.slots.length) | 0
+      if (busy[a]) continue
+      var ns = this.neighbours(this.slots[a]).filter(function (n) { return !busy[n] })
+      if (!ns.length) continue
+      var b = ns[(Math.random() * ns.length) | 0]
+      this.swaps.push({ a: a, b: b, t: 0 })
+      return
+    }
+  }
+
+  /** Gradient field: two drifting sine waves, slightly warped, shaped so most of the screen stays dark. */
+  HexGrid.prototype.field = function (x, y, t) {
+    var s = t / 1000
+    var v = 0.5 + 0.28 * Math.sin(x * 0.0042 + s * 0.22 + Math.sin(y * 0.003 + s * 0.09) * 1.6) + 0.22 * Math.sin(y * 0.0058 - s * 0.17 + x * 0.0013)
+    return Math.pow(Math.max(0, Math.min(1, v)), 1.5)
+  }
+
+  HexGrid.prototype.tick = function (t) {
+    var dt = Math.min(100, t - this.last)
+    this.last = t
+    this.acc += dt
+    this.sinceSwap += dt
+    if (this.sinceSwap >= SWAP_EVERY_MS) {
+      this.sinceSwap = 0
+      this.startSwap()
+    }
+    var cursorIn = this.mx > -1e5
+    if (!(cursorIn || this.acc >= FRAME_MS)) return
+    var step = this.acc
+    this.acc = 0
+    // advance swaps; when one completes, the two slots exchange tiles
+    for (var i = this.swaps.length - 1; i >= 0; i--) {
+      var sw = this.swaps[i]
+      sw.t += step / SWAP_MS
+      if (sw.t >= 1) {
+        var ta = this.slots[sw.a].tile
+        this.slots[sw.a].tile = this.slots[sw.b].tile
+        this.slots[sw.b].tile = ta
+        this.swaps.splice(i, 1)
+      }
+    }
+    this.draw(t)
+  }
+
+  HexGrid.prototype.colourFor = function (tile, x, y, t, hover) {
+    var v = 0.68 * this.field(x, y, t) + 0.32 * tile.tint + hover * 0.45
+    var c = gradient(v)
+    return 'rgb(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ')'
+  }
+
+  HexGrid.prototype.draw = function (t) {
+    var ctx = this.ctx
+    if (!ctx) return
+    var dpr = this.dpr
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    ctx.fillStyle = BG
+    ctx.fillRect(0, 0, this.w, this.h)
+    var moving = {}
+    this.swaps.forEach(function (sw) { moving[sw.a] = moving[sw.b] = 1 })
+    var mx = this.mx, my = this.my, hr2 = HOVER_RADIUS * HOVER_RADIUS
+    var smooth = Math.min(1, (FRAME_MS / 1000) * 6)
+    for (var i = 0; i < this.slots.length; i++) {
+      var s = this.slots[i]
+      var tile = this.tiles[s.tile]
+      var dx = s.x - mx, dy = s.y - my
+      var d2 = dx * dx + dy * dy
+      var target = d2 < hr2 ? 1 - Math.sqrt(d2) / HOVER_RADIUS : 0
+      tile.hover += (target - tile.hover) * smooth
+      if (moving[i]) continue
+      ctx.setTransform(dpr, 0, 0, dpr, s.x * dpr, s.y * dpr)
+      ctx.fillStyle = this.colourFor(tile, s.x, s.y, t, tile.hover)
+      ctx.fill(this.hexPath)
+    }
+    // swapping hexes: slide past each other, shrunk a little, with an orange rim
+    for (var k = 0; k < this.swaps.length; k++) {
+      var sw = this.swaps[k]
+      var A = this.slots[sw.a], B = this.slots[sw.b]
+      var e = ease(Math.min(1, sw.t))
+      var lift = Math.sin(Math.PI * Math.min(1, sw.t)) // 0 -> 1 -> 0
+      var scale = 1 - 0.18 * lift
+      // empty sockets underneath
+      ;[A, B].forEach(function (S) {
+        ctx.setTransform(dpr, 0, 0, dpr, S.x * dpr, S.y * dpr)
+        ctx.fillStyle = '#0b0b0b'
+        ctx.fill(this.hexPath)
+      }, this)
+      var pairs = [[A, B, this.tiles[A.tile]], [B, A, this.tiles[B.tile]]]
+      for (var p = 0; p < 2; p++) {
+        var from = pairs[p][0], to = pairs[p][1], tl = pairs[p][2]
+        // offset perpendicular so they pass beside each other rather than through
+        var px = -(to.y - from.y) * 0.18 * lift * (p ? -1 : 1)
+        var py = (to.x - from.x) * 0.18 * lift * (p ? -1 : 1)
+        var x = from.x + (to.x - from.x) * e + px
+        var y = from.y + (to.y - from.y) * e + py
+        ctx.setTransform(dpr * scale, 0, 0, dpr * scale, x * dpr, y * dpr)
+        ctx.fillStyle = this.colourFor(tl, x, y, t, tl.hover + 0.25 * lift)
+        ctx.fill(this.hexPath)
+        ctx.lineWidth = 1.5 / scale
+        ctx.strokeStyle = 'rgba(255,140,47,' + (0.85 * lift).toFixed(3) + ')'
+        ctx.stroke(this.hexPath)
+      }
+    }
+    ctx.setTransform(1, 0, 0, 1, 0, 0)
+  }
+
+  function start() {
+    if (!document.body || document.querySelector('.starfield-canvas')) return
+    new HexGrid()
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start)
+  else start()
+})()
+]]>
+</INLINE>
+</FILE>
+<FILE Run="/bin/bash">
+<INLINE>
+mkdir -p /usr/local/emhttp/plugins/hexgrid/fonts
+cp /boot/config/plugins/hexgrid/fonts/*.woff2 /usr/local/emhttp/plugins/hexgrid/fonts/ 2>/dev/null
+chmod -R a+rX /usr/local/emhttp/plugins/hexgrid
+echo "hexgrid: $(ls /usr/local/emhttp/plugins/hexgrid/fonts | wc -l) fonts installed"
+</INLINE>
+</FILE>
+<FILE Run="/bin/bash" Method="remove">
+<INLINE>
+# fonts on the flash are kept so a reinstall works
+rm -rf /usr/local/emhttp/plugins/hexgrid
+echo "hexgrid removed"
+</INLINE>
+</FILE>
+</PLUGIN>
