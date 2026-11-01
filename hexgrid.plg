@@ -1,7 +1,7 @@
 <?xml version='1.0' standalone='yes'?>
 <!DOCTYPE PLUGIN [
 <!ENTITY name "hexgrid">
-<!ENTITY version "2026.10.31.2323">
+<!ENTITY version "2026.10.31.2327">
 <!ENTITY emhttp "/usr/local/emhttp/plugins/&name;">
 <!ENTITY gitURL "https://raw.githubusercontent.com/Aestylis/unraid-starfield/main">
 <!ENTITY pluginURL "&gitURL;/&name;.plg">
@@ -13,10 +13,12 @@
 </CHANGES>
 <FILE Run="/bin/bash">
 <INLINE>
-if [ -d /usr/local/emhttp/plugins/starfield ]; then
-  echo "The starfield theme plugin is installed. Remove it first: only one of starfield/hexgrid can be active."
-  exit 1
-fi
+for t in starfield parity; do
+  if [ -d /usr/local/emhttp/plugins/$t ]; then
+    echo "The $t theme plugin is installed. Remove it first: only one of starfield/hexgrid/parity can be active."
+    exit 1
+  fi
+done
 </INLINE>
 </FILE>
 <FILE Name="/boot/config/plugins/&name;/fonts/exo-2-latin-400-normal.woff2">
@@ -49,7 +51,7 @@ Link="nav-starfield"
 <FILE Name="&emhttp;/ember.css">
 <INLINE>
 <![CDATA[
-/* Ember theme for the Unraid webGui (orange / grey / black), generated from nebula.css by make-ember.py.
+/* Ember theme for the Unraid webGui (orange / grey / black), generated from nebula.css by make-themes.py.
  * Unraid themes are CSS variables on :root; `html:root` outranks them, and this file loads in <head> after the theme,
  * so there is no flash of the old colours. Surfaces are translucent so the page-wide hex grid shows through. */
 @font-face { font-family: 'Orbitron'; font-weight: 500; font-display: swap; src: url('fonts/orbitron-latin-500-normal.woff2') format('woff2'); }

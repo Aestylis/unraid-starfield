@@ -1,4 +1,4 @@
-/* Ember theme for the Unraid webGui (orange / grey / black), generated from nebula.css by make-ember.py.
+/* Ember theme for the Unraid webGui (orange / grey / black), generated from nebula.css by make-themes.py.
  * Unraid themes are CSS variables on :root; `html:root` outranks them, and this file loads in <head> after the theme,
  * so there is no flash of the old colours. Surfaces are translucent so the page-wide hex grid shows through. */
 @font-face { font-family: 'Orbitron'; font-weight: 500; font-display: swap; src: url('fonts/orbitron-latin-500-normal.woff2') format('woff2'); }
