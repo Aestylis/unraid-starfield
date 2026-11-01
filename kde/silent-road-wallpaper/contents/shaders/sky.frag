@@ -84,7 +84,7 @@ void main() {
     }
 
     // moon halo (dimmed when clouds cover the moon)
-    float moonVis = 1.0 - 0.85 * cloudAtMoon;
+    float moonVis = 1.0 - 0.55 * cloudAtMoon;     // halo + moonlight soften (not vanish) when cloud crosses the moon
     float halo = exp(-max(mdist - 1.0, 0.0) * 1.6) * 0.20 * moonVis * (0.4 + 0.6 * abs(cos(6.2831853 * moonPhase - 3.14159265)));
     col += vec3(0.55, 0.62, 0.75) * halo;
 
@@ -102,8 +102,7 @@ void main() {
         bool lit = moonPhase < 0.5 ? (md.x > s * k) : (md.x < -s * k);
         float crater = 0.88 + 0.12 * vnoise(md * 3.5 + 4.0) - 0.10 * smoothstep(0.55, 0.75, vnoise(md * 6.0 + 9.0));
         vec3 disc = lit ? vec3(0.86, 0.87, 0.84) * crater : vec3(0.10, 0.12, 0.16);   // dark side: faint earthshine
-        col = mix(col, disc, moonVis + (lit ? 0.0 : 0.0));
-        col = mix(col, vec3(0.20, 0.23, 0.29), cloudAtMoon * 0.6 * float(lit));       // seen through cloud
+        col = disc;                       // full brightness; the cloud layer below hides whatever is behind cloud
     }
 
     // clouds over everything: shaded bands, silver-lined toward the moon
