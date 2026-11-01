@@ -5,7 +5,7 @@ Three full webGui reskins for Unraid 7.3+, each with a live animated background 
 | | **Starfield** (Nebula) | **Hexgrid** (Ember) | **Parity** (Array) |
 |---|---|---|---|
 | Palette | deep purple, violet accent | black, grey, orange | Unraid brand red → orange on charcoal |
-| Background | three-layer parallax starfield drifting left; stars twinkle and scatter away from the cursor | hex grid under a drifting black→grey→orange gradient; neighbouring hexes randomly slide past each other and swap places; hexes warm up under the cursor | **live**: a row of wells along the bottom, one per array disk / parity / pool, filled to each disk's real used % (spun-down disks go dark); particles stream down into disks at their real write rate and rise back up at their real read rate; the top edge glows with network traffic; hover a well for name, read/write speed, usage and temperature |
+| Background | three-layer parallax starfield drifting left; stars twinkle and scatter away from the cursor | hex grid under a drifting black→grey→orange gradient; neighbouring hexes randomly slide past each other and swap places; hexes warm up under the cursor | **live circuit board**: data enters at a network connector on the left, runs through a controller chip and out along copper traces to one chip per disk (parity, data, pools) on the right; writes travel as packets left→right and reads right→left at the disk's real rate, active traces glow, chips show real usage / spin-down; hover a chip for read/write speed, usage and temperature |
 | Fonts | Orbitron (headings, nav) + Exo 2 (body) | same | Unraid's own bitstream (labels) + clear-sans (body) |
 | Panels | chamfered glass | chamfered glass | square, red→orange gradient accent bars |
 
