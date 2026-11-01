@@ -1,14 +1,40 @@
 <?xml version='1.0' standalone='yes'?>
 <!DOCTYPE PLUGIN [
 <!ENTITY name "hexgrid">
-<!ENTITY version "2026.10.31.2320">
+<!ENTITY version "2026.10.31.2323">
 <!ENTITY emhttp "/usr/local/emhttp/plugins/&name;">
+<!ENTITY gitURL "https://raw.githubusercontent.com/Aestylis/unraid-starfield/main">
+<!ENTITY pluginURL "&gitURL;/&name;.plg">
 ]>
-<PLUGIN name="&name;" author="quentin" version="&version;" min="7.0.0" icon="star">
+<PLUGIN name="&name;" author="Aestylis" version="&version;" min="7.3.0" icon="th" pluginURL="&pluginURL;" support="https://github.com/Aestylis/unraid-starfield/issues">
 <CHANGES>
 ###&version;
 - Ember theme (orange/grey/black, Orbitron/Exo 2) with an animated hex grid background
 </CHANGES>
+<FILE Run="/bin/bash">
+<INLINE>
+if [ -d /usr/local/emhttp/plugins/starfield ]; then
+  echo "The starfield theme plugin is installed. Remove it first: only one of starfield/hexgrid can be active."
+  exit 1
+fi
+</INLINE>
+</FILE>
+<FILE Name="/boot/config/plugins/&name;/fonts/exo-2-latin-400-normal.woff2">
+<URL>&gitURL;/fonts/exo-2-latin-400-normal.woff2</URL>
+<MD5>bc006d0366eafacfa60e11d6fbf480a9</MD5>
+</FILE>
+<FILE Name="/boot/config/plugins/&name;/fonts/exo-2-latin-600-normal.woff2">
+<URL>&gitURL;/fonts/exo-2-latin-600-normal.woff2</URL>
+<MD5>e5f13258dcb3c76874ea7c7388e00b27</MD5>
+</FILE>
+<FILE Name="/boot/config/plugins/&name;/fonts/orbitron-latin-500-normal.woff2">
+<URL>&gitURL;/fonts/orbitron-latin-500-normal.woff2</URL>
+<MD5>1967d90b0a095e7bab678006d8e1492d</MD5>
+</FILE>
+<FILE Name="/boot/config/plugins/&name;/fonts/orbitron-latin-700-normal.woff2">
+<URL>&gitURL;/fonts/orbitron-latin-700-normal.woff2</URL>
+<MD5>42434321bd798551eb8f4873f76e6b43</MD5>
+</FILE>
 <FILE Name="&emhttp;/HexgridHeader.page">
 <INLINE>
 <![CDATA[
