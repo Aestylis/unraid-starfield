@@ -1,0 +1,17 @@
+{
+  "KPlugin": {
+    "Id": "aestylis.plasma.wallpaper.hexgrid",
+    "Name": "Hexgrid (Ember)",
+    "Version": "1.0",
+    "Category": "Wallpaper",
+    "Description": "Animated hex grid: a drifting black/grey/orange gradient where neighbouring hexes slide past each other and swap places. From the Unraid hexgrid-theme.",
+    "Icon": "preferences-desktop-wallpaper",
+    "License": "MIT",
+    "Website": "https://github.com/Aestylis/unraid-starfield",
+    "Authors": [{ "Name": "Aestylis" }]
+  },
+  "X-Plasma-API-Minimum-Version": "6.0",
+  "X-Plasma-MainScript": "ui/main.qml",
+  "X-KDE-PluginInfo-HasConfiguration": true,
+  "KPackageStructure": "Plasma/Wallpaper"
+}

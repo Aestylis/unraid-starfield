@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0">
+  <kcfgfile name=""/>
+  <group name="General">
+    <entry name="hexSize" type="Int"><default>30</default><min>14</min><max>80</max></entry>
+    <entry name="fps" type="Int"><default>24</default><min>5</min><max>60</max></entry>
+    <entry name="swapsPerSecond" type="Int"><default>4</default><min>0</min><max>20</max></entry>
+    <entry name="mouseGlow" type="Bool"><default>true</default></entry>
+  </group>
+</kcfg>

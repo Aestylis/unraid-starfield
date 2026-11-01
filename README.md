@@ -60,3 +60,15 @@ automatically (date-based version).
 - Fonts: [Orbitron](https://fonts.google.com/specimen/Orbitron) and [Exo 2](https://fonts.google.com/specimen/Exo+2),
   SIL Open Font License 1.1 (see `fonts/OFL-*.txt`), via Fontsource.
 - Not affiliated with or endorsed by Lime Technology. Unraid is a trademark of Lime Technology, Inc.
+
+## Bonus: Hexgrid as a KDE Plasma 6 wallpaper
+
+`kde/hexgrid-wallpaper/` is a native Plasma 6 animated wallpaper port of the hex grid (same gradient field and swaps,
+drawn with a QML Canvas). Install for your user and pick **Hexgrid (Ember)** under *Desktop and Wallpaper → Wallpaper
+type*:
+
+```
+kpackagetool6 -t Plasma/Wallpaper -i kde/hexgrid-wallpaper      # upgrade later with -u
+```
+
+Settings: hex size, frame rate, swaps per second, cursor glow (works when the pointer is over bare desktop).
