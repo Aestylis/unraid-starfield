@@ -1,7 +1,7 @@
 <?xml version='1.0' standalone='yes'?>
 <!DOCTYPE PLUGIN [
 <!ENTITY name "starfield">
-<!ENTITY version "2026.10.31.2300">
+<!ENTITY version "2026.10.31.2312">
 <!ENTITY emhttp "/usr/local/emhttp/plugins/&name;">
 ]>
 <PLUGIN name="&name;" author="quentin" version="&version;" min="7.0.0" icon="star">
@@ -102,6 +102,59 @@ html:root {
   --focus-input-bg-color: rgba(30, 18, 64, 0.85);
   --shade-bg-color: rgba(18, 12, 44, 0.7);
   --dynamix-filetree-bg-color: var(--nb-bg-elev);
+
+  /* tablesorter (Plugins, Docker, Unassigned Devices tables) */
+  --dynamix-tablesorter-thead-row-border-color: var(--nb-hairline);
+  --dynamix-tablesorter-thead-th-text-color: var(--nb-text);
+  --dynamix-tablesorter-thead-th-bg-color: var(--nb-panel);
+  --dynamix-tablesorter-tbody-row-alt-bg-color: rgba(18, 12, 44, 0.55);
+  --dynamix-tablesorter-tbody-row-bg-color: transparent;
+  --dynamix-tablesorter-tbody-row-border-color: var(--nb-hairline);
+  --dynamix-select-box-shadow: 0 2px 0 var(--nb-accent), inset 0 -1px var(--nb-bg);
+  --dynamix-select-disabled-bg-color: rgba(18, 12, 44, 0.7);
+  --dynamix-tooltipster-sidetip-bg-from: var(--nb-bg-elev);
+  --dynamix-tooltipster-sidetip-bg-to: #1d1240;
+  --dynamix-tooltipster-sidetip-arrow-bg-color: #1d1240;
+  --dynamix-tooltipster-sidetip-box-border-color: var(--nb-accent);
+  --dynamix-awesomplete-text-color: var(--nb-text);
+  --dynamix-awesomplete-list-bg-color: var(--nb-panel-solid);
+  --dynamix-awesomplete-list-bg-from-color: var(--nb-panel-solid);
+  --dynamix-awesomplete-list-before-bg-color: var(--nb-panel-solid);
+  --dynamix-awesomplete-list-item-hover-bg-color: rgba(180, 140, 255, 0.25);
+  --dynamix-awesomplete-list-item-hover-text-color: var(--nb-text);
+  --dynamix-awesomplete-list-item-selected-bg-color: var(--nb-accent-deep);
+  --dynamix-awesomplete-mark-hover-bg-color: var(--nb-accent);
+
+  /* Community Apps */
+  --template-background: var(--nb-panel);
+  --template-hover-background: rgba(48, 30, 96, 0.75);
+  --template-favourite: rgba(180, 140, 255, 0.22);
+  --a-color: var(--nb-link);
+  --sidebar-background: rgba(7, 5, 26, 0.8);
+  --sidebar-text: var(--nb-text);
+  --support-popup-text: var(--nb-text);
+  --support-popup-background: var(--nb-panel-solid);
+  --unraid-66-color: var(--nb-accent);
+  --ca-legacy-background-color: transparent;
+  --tooltipster-content: var(--nb-text);
+  --chart-grid: var(--nb-hairline);
+}
+
+/* Unraid declares these on `.Theme--black:root` (specificity 0,2,0); `html:root:root` (0,2,1) beats it. */
+html:root:root {
+  --dynamix-jquery-ui-button-text-color: var(--nb-text);
+  --dynamix-jquery-ui-button-background-start: var(--nb-accent-deep);
+  --dynamix-jquery-ui-button-background-end: var(--nb-accent);
+  --dynamix-jquery-ui-button-hover-color: #fff;
+  --dynamix-jquery-ui-border-color: var(--nb-panel-border);
+  --dynamix-jquery-ui-header-background: var(--nb-panel);
+  --dynamix-jquery-ui-header-color: var(--nb-text);
+  --dynamix-jquery-ui-content-background: var(--nb-panel-solid);
+  --dynamix-jquery-ui-content-color: var(--nb-text);
+  --dynamix-jquery-ui-active-background: rgba(180, 140, 255, 0.2);
+  --dynamix-jquery-ui-dropcontainer-background: var(--nb-panel-solid);
+  --dynamix-jquery-ui-disabled-background: rgba(18, 12, 44, 0.7);
+  --dynamix-jquery-ui-text-color: var(--nb-text);
 }
 
 /* page: deep purple with Nebula's glow; the starfield canvas sits behind everything */
@@ -213,6 +266,34 @@ textarea:focus {
   text-shadow: var(--nb-text-glow);
 }
 .tabs button[role="tab"] { font-family: var(--nb-font-display); }
+
+/* toggle switches (jquery.switchbutton hardcodes blue/grey) */
+.switch-button-label.on { color: var(--nb-accent) !important; }
+.switch-button-label { color: var(--nb-text-dim); }
+.switch-button-background {
+  background-color: rgba(180, 140, 255, 0.12) !important;
+  border-color: var(--nb-hairline) !important;
+}
+.switch-button-background.checked {
+  background-color: var(--nb-accent-deep) !important;
+  box-shadow: 0 0 8px var(--nb-accent-glow);
+}
+.switch-button-button {
+  background-color: var(--nb-text) !important;
+  border-color: var(--nb-panel-border) !important;
+}
+
+/* Community Apps: cards as holo panels, search box glass */
+.ca_holder, .ca_template, div.ca_holderDocker, div.ca_holderPlugin {
+  backdrop-filter: blur(6px);
+  border-color: var(--nb-panel-border) !important;
+}
+.searchArea input, input#searchBox, input.searchBox {
+  background-color: var(--nb-panel) !important;
+  color: var(--nb-text) !important;
+  border: 1px solid var(--nb-hairline) !important;
+}
+img.ca_displayIcon, img.popupIcon { background-color: rgba(180, 140, 255, 0.14); }
 
 /* footer: glass strip */
 #footer {
