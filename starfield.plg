@@ -1,7 +1,7 @@
 <?xml version='1.0' standalone='yes'?>
 <!DOCTYPE PLUGIN [
 <!ENTITY name "starfield">
-<!ENTITY version "2026.11.01.0006">
+<!ENTITY version "2026.11.01.0016">
 <!ENTITY emhttp "/usr/local/emhttp/plugins/&name;">
 <!ENTITY gitURL "https://raw.githubusercontent.com/Aestylis/unraid-starfield/main">
 <!ENTITY pluginURL "&gitURL;/&name;.plg">
@@ -353,6 +353,27 @@ svg [fill="#4DA74D" i] { fill: #5cff8a; }
 svg [stroke="#4DA74D" i] { stroke: #5cff8a; }
 svg [stroke="#C0C0C0" i] { stroke: rgba(180, 140, 255, 0.22); }
 svg text { font-family: var(--nb-font-body) !important; }
+
+/* Unraid 7 toasts (sonner) and notification list: "notice"-level alerts use sonner's blue "info" style and
+ * Tailwind blue; repaint them in the theme accent. Warnings/errors/success keep their own colours. */
+html body [data-sonner-toaster] {
+  --info-bg: var(--nb-panel-solid) !important;
+  --info-border: var(--nb-accent) !important;
+  --info-text: var(--nb-text) !important;
+  --normal-bg: var(--nb-panel-solid) !important;
+  --normal-border: var(--nb-hairline) !important;
+  --normal-text: var(--nb-text) !important;
+  font-family: var(--nb-font-body) !important;
+}
+html body [data-sonner-toaster] [data-sonner-toast][data-type="info"] [data-icon] { color: var(--nb-accent); }
+html:root:root {
+  --color-blue-300: #c9a6ff;
+  --color-blue-400: var(--nb-accent);
+  --color-blue-500: var(--nb-accent);
+  --color-blue-600: var(--nb-accent-deep);
+  --color-blue-700: var(--nb-accent-deep);
+  --color-sky-500: var(--nb-accent);
+}
 
 /* footer: glass strip */
 #footer {
