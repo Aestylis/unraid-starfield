@@ -58,32 +58,37 @@ float bayer4(vec2 q) {
 }
 
 // ---- palettes: one hand-picked 16-colour set per phase; the active palette blends between them each frame
-//      (night <-> day by sun height, then toward dusk or dawn during twilight). PAL_TAIL is reserved for the plough.
-const vec3 PAL_NIGHT[16] = vec3[16](
+//      (night <-> day by sun height, then toward dusk or dawn during twilight); entries 16-19 are each phase's sky blues.
+//      PAL_TAIL is reserved for the plough.
+const vec3 PAL_NIGHT[20] = vec3[20](
     vec3(0.027, 0.035, 0.051), vec3(0.051, 0.067, 0.094), vec3(0.075, 0.098, 0.145), vec3(0.106, 0.133, 0.192),
     vec3(0.137, 0.173, 0.239), vec3(0.176, 0.216, 0.286), vec3(0.227, 0.271, 0.349), vec3(0.290, 0.337, 0.420),
     vec3(0.369, 0.416, 0.502), vec3(0.463, 0.510, 0.604), vec3(0.580, 0.627, 0.714), vec3(0.765, 0.796, 0.847),
-    vec3(0.231, 0.188, 0.149), vec3(0.431, 0.329, 0.208), vec3(0.706, 0.541, 0.322), vec3(0.941, 0.827, 0.627));
-const vec3 PAL_DAY[16] = vec3[16](
+    vec3(0.231, 0.188, 0.149), vec3(0.431, 0.329, 0.208), vec3(0.706, 0.541, 0.322), vec3(0.941, 0.827, 0.627),
+    vec3(0.050, 0.070, 0.140), vec3(0.080, 0.110, 0.220), vec3(0.120, 0.170, 0.320), vec3(0.200, 0.270, 0.450));
+const vec3 PAL_DAY[20] = vec3[20](
     vec3(0.100, 0.120, 0.120), vec3(0.160, 0.200, 0.190), vec3(0.220, 0.200, 0.190), vec3(0.300, 0.330, 0.360),
     vec3(0.400, 0.440, 0.480), vec3(0.480, 0.520, 0.570), vec3(0.580, 0.630, 0.690), vec3(0.660, 0.710, 0.770),
     vec3(0.740, 0.780, 0.830), vec3(0.820, 0.850, 0.890), vec3(0.890, 0.910, 0.940), vec3(0.950, 0.960, 0.970),
-    vec3(0.550, 0.330, 0.140), vec3(0.800, 0.520, 0.200), vec3(0.450, 0.460, 0.480), vec3(1.000, 0.800, 0.450));
-const vec3 PAL_DUSK[16] = vec3[16](
+    vec3(0.550, 0.330, 0.140), vec3(0.800, 0.520, 0.200), vec3(0.450, 0.460, 0.480), vec3(1.000, 0.800, 0.450),
+    vec3(0.300, 0.460, 0.740), vec3(0.420, 0.580, 0.830), vec3(0.560, 0.690, 0.880), vec3(0.700, 0.800, 0.930));
+const vec3 PAL_DUSK[20] = vec3[20](
     vec3(0.050, 0.050, 0.090), vec3(0.090, 0.090, 0.150), vec3(0.140, 0.130, 0.210), vec3(0.200, 0.180, 0.280),
     vec3(0.280, 0.240, 0.340), vec3(0.380, 0.300, 0.380), vec3(0.500, 0.380, 0.420), vec3(0.640, 0.460, 0.420),
     vec3(0.780, 0.540, 0.380), vec3(0.900, 0.620, 0.360), vec3(0.960, 0.740, 0.480), vec3(0.990, 0.860, 0.640),
-    vec3(0.231, 0.188, 0.149), vec3(0.431, 0.329, 0.208), vec3(0.706, 0.541, 0.322), vec3(0.941, 0.827, 0.627));
-const vec3 PAL_DAWN[16] = vec3[16](
+    vec3(0.231, 0.188, 0.149), vec3(0.431, 0.329, 0.208), vec3(0.706, 0.541, 0.322), vec3(0.941, 0.827, 0.627),
+    vec3(0.080, 0.100, 0.220), vec3(0.130, 0.170, 0.340), vec3(0.200, 0.250, 0.460), vec3(0.300, 0.360, 0.580));
+const vec3 PAL_DAWN[20] = vec3[20](
     vec3(0.060, 0.060, 0.100), vec3(0.100, 0.110, 0.170), vec3(0.160, 0.170, 0.250), vec3(0.240, 0.250, 0.340),
     vec3(0.340, 0.340, 0.440), vec3(0.460, 0.430, 0.520), vec3(0.600, 0.520, 0.600), vec3(0.740, 0.600, 0.660),
     vec3(0.860, 0.680, 0.660), vec3(0.930, 0.780, 0.700), vec3(0.970, 0.880, 0.800), vec3(0.990, 0.950, 0.900),
-    vec3(0.231, 0.188, 0.149), vec3(0.431, 0.329, 0.208), vec3(0.706, 0.541, 0.322), vec3(0.941, 0.827, 0.627));
+    vec3(0.231, 0.188, 0.149), vec3(0.431, 0.329, 0.208), vec3(0.706, 0.541, 0.322), vec3(0.941, 0.827, 0.627),
+    vec3(0.090, 0.120, 0.250), vec3(0.150, 0.210, 0.400), vec3(0.240, 0.330, 0.560), vec3(0.380, 0.480, 0.700));
 const vec3 PAL_TAIL = vec3(0.702, 0.235, 0.188);
 vec3 quantize(vec3 c, vec2 q) {
     c += (bayer4(q) - 0.5) * 0.055;
     float bd = 1e9; vec3 best = vec3(0.0);
-    for (int i = 0; i < 16; i++) {
+    for (int i = 0; i < 20; i++) {
         vec3 pc = mix(mix(PAL_NIGHT[i], PAL_DAY[i], day), mix(PAL_DUSK[i], PAL_DAWN[i], rising), twi * 0.85);
         vec3 d = c - pc; float e = dot(d, d * vec3(1.0, 1.25, 0.9));
         if (e < bd) { bd = e; best = pc; }
@@ -208,7 +213,8 @@ void main() {
     // ---------------- SKY
     float sk = clamp((p.y - HZ) / (1.0 - HZ), 0.0, 1.0);
     vec3 glow = mix(vec3(0.95, 0.58, 0.36), vec3(0.88, 0.60, 0.64), rising);      // dusk orange / dawn rose
-    vec3 col = mix(DN(vec3(0.115, 0.14, 0.19), vec3(0.80, 0.84, 0.88)), DN(vec3(0.04, 0.05, 0.075), vec3(0.60, 0.67, 0.75)), pow(sk, 0.6));
+    vec3 col = mix(DN(vec3(0.115, 0.14, 0.20), vec3(0.74, 0.82, 0.92)), DN(vec3(0.045, 0.06, 0.11), vec3(0.44, 0.60, 0.84)), pow(sk, 0.6));
+    col = mix(col, vec3(0.20, 0.26, 0.46), twi * 0.38 * smoothstep(0.35, 1.0, sk));      // blue hour overhead (soft: the sky screen carries most of it)
     col = mix(col, glow, twi * 0.75 * exp(-sk * 3.0));                             // horizon glow at dawn/dusk
     // clouds: same recipe as the sky screen, thinning toward the horizon so the two monitors read as one sky
     if (p.y > HZ) {
