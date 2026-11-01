@@ -61,35 +61,7 @@ automatically (date-based version).
   SIL Open Font License 1.1 (see `fonts/OFL-*.txt`), via Fontsource.
 - Not affiliated with or endorsed by Lime Technology. Unraid is a trademark of Lime Technology, Inc.
 
-## Bonus: Hexgrid as a KDE Plasma 6 wallpaper
+## KDE Plasma wallpapers
 
-`kde/hexgrid-wallpaper/` is a native Plasma 6 animated wallpaper port of the hex grid (same gradient field and swaps),
-rendered on the GPU with a fragment shader (~4% of one CPU core at 3440x1440, 24 fps). Rebuild the shader after
-editing with `qsb --glsl "100 es,120,150" --hlsl 50 --msl 12 -o hexgrid.frag.qsb hexgrid.frag` (qt6-qtshadertools). Install for your user and pick **Hexgrid (Ember)** under *Desktop and Wallpaper → Wallpaper
-type*:
-
-```
-kpackagetool6 -t Plasma/Wallpaper -i kde/hexgrid-wallpaper      # upgrade later with -u
-```
-
-Settings: hex size, frame rate, swaps per second.
-
-## Bonus: Silent County Road (KDE Plasma 6 wallpaper)
-
-`kde/silent-road-wallpaper/` is a fully procedural pixel-art winter night — an empty snowy road, two dim streetlamps,
-a leaning utility pole, buried fence posts — rendered by one GPU fragment shader (no images). 16-colour palette with
-ordered dithering; hash-based snow in three depth layers that is nearly invisible except inside the lamplight; wind
-that drifts through calm/drift/gust moods; fog that gathers. **Same scene, day and night, from the real sun**: sunrise/sunset/sun position are computed for your
-latitude/longitude (default Grants Pass, OR). The palette swaps between hand-picked night, dawn, day and dusk sets;
-streetlamps switch off after sunrise and stutter back on at dusk; snow builds on the road through the night until a
-small plough with an amber beacon clears it ~25 minutes after sunrise; the fog lifts by late morning.
-
-```
-kpackagetool6 -t Plasma/Wallpaper -i kde/silent-road-wallpaper
-```
-
-Pick **Silent County Road** under *Desktop and Wallpaper → Wallpaper type*. For a monitor above the road, set
-**Scene: Sky** on that screen: the moon in its real current phase behind drifting snow clouds, sharing the same clock,
-wind and snowfall. Pixel blocks are sized in physical pixels so scaled monitors match. Shaders use an integer hash, so
-compile them for desktop GL/Vulkan: `qsb --glsl "150,330" --hlsl 50 --msl 12 -o sky.frag.qsb sky.frag`. Settings: scene (road / sky), pixel size, frame
-rate, snow, fog, wind, lamp flicker, winter mode, latitude/longitude, and a preview hour to see any time of day.
+The Hexgrid desktop wallpaper port (and Silent County Road) now live in
+[Aestylis/kde](https://github.com/Aestylis/kde).
