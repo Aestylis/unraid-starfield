@@ -210,7 +210,7 @@
       ctx.fillStyle = this.colourFor(tile, s.x, s.y, t, tile.hover)
       ctx.fill(this.hexPath)
     }
-    // swapping hexes: slide past each other, shrunk a little, with an orange rim
+    // swapping hexes: slide past each other, shrunk a little
     for (var k = 0; k < this.swaps.length; k++) {
       var sw = this.swaps[k]
       var A = this.slots[sw.a], B = this.slots[sw.b]
@@ -234,9 +234,6 @@
         ctx.setTransform(dpr * scale, 0, 0, dpr * scale, x * dpr, y * dpr)
         ctx.fillStyle = this.colourFor(tl, x, y, t, tl.hover + 0.25 * lift)
         ctx.fill(this.hexPath)
-        ctx.lineWidth = 1.5 / scale
-        ctx.strokeStyle = 'rgba(255,140,47,' + (0.85 * lift).toFixed(3) + ')'
-        ctx.stroke(this.hexPath)
       }
     }
     ctx.setTransform(1, 0, 0, 1, 0, 0)

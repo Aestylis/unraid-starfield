@@ -1,7 +1,7 @@
 <?xml version='1.0' standalone='yes'?>
 <!DOCTYPE PLUGIN [
 <!ENTITY name "hexgrid-theme">
-<!ENTITY version "2026.11.01.0018">
+<!ENTITY version "2026.11.01.0809">
 <!ENTITY emhttp "/usr/local/emhttp/plugins/&name;">
 <!ENTITY gitURL "https://raw.githubusercontent.com/Aestylis/unraid-starfield/main">
 <!ENTITY pluginURL "&gitURL;/&name;.plg">
@@ -611,7 +611,7 @@ html:root:root {
       ctx.fillStyle = this.colourFor(tile, s.x, s.y, t, tile.hover)
       ctx.fill(this.hexPath)
     }
-    // swapping hexes: slide past each other, shrunk a little, with an orange rim
+    // swapping hexes: slide past each other, shrunk a little
     for (var k = 0; k < this.swaps.length; k++) {
       var sw = this.swaps[k]
       var A = this.slots[sw.a], B = this.slots[sw.b]
@@ -635,9 +635,6 @@ html:root:root {
         ctx.setTransform(dpr * scale, 0, 0, dpr * scale, x * dpr, y * dpr)
         ctx.fillStyle = this.colourFor(tl, x, y, t, tl.hover + 0.25 * lift)
         ctx.fill(this.hexPath)
-        ctx.lineWidth = 1.5 / scale
-        ctx.strokeStyle = 'rgba(255,140,47,' + (0.85 * lift).toFixed(3) + ')'
-        ctx.stroke(this.hexPath)
       }
     }
     ctx.setTransform(1, 0, 0, 1, 0, 0)
