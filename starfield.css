@@ -1,0 +1,17 @@
+/* Replace the banner image with a deep-space backdrop; the canvas sits behind the header's own content.
+ * #header is position:relative with a z-index, so it is a stacking context: z-index -1 paints above its
+ * background but below its children. */
+html.starfield-on #header {
+  background-image: none !important;
+  background-color: #03040a !important;
+  isolation: isolate;
+}
+html.starfield-on #header .starfield-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+}
+.nav-starfield { display: none !important; }
