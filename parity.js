@@ -10,9 +10,9 @@
 (function () {
   'use strict'
 
-  var CELL_W = 34 // block width (px)
-  var CELL_H = 12 // block height (px)
-  var GAP_X = 14 // gap between disk lanes
+  var CELL_W = 18 // block width (px): square blocks
+  var CELL_H = 18 // block height (px)
+  var GAP_X = 10 // gap between disk lanes
   var GAP_Y = 4 // gap between blocks
   var PARITY_EVERY = 7 // every Nth lane is a parity disk
   var FRAME_MS = 1000 / 24

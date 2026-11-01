@@ -1,7 +1,7 @@
 <?xml version='1.0' standalone='yes'?>
 <!DOCTYPE PLUGIN [
 <!ENTITY name "hexgrid">
-<!ENTITY version "2026.10.31.2327">
+<!ENTITY version "2026.10.31.2346">
 <!ENTITY emhttp "/usr/local/emhttp/plugins/&name;">
 <!ENTITY gitURL "https://raw.githubusercontent.com/Aestylis/unraid-starfield/main">
 <!ENTITY pluginURL "&gitURL;/&name;.plg">

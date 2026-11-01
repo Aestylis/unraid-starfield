@@ -1,7 +1,7 @@
 <?xml version='1.0' standalone='yes'?>
 <!DOCTYPE PLUGIN [
 <!ENTITY name "parity">
-<!ENTITY version "2026.10.31.2327">
+<!ENTITY version "2026.10.31.2346">
 <!ENTITY emhttp "/usr/local/emhttp/plugins/&name;">
 <!ENTITY gitURL "https://raw.githubusercontent.com/Aestylis/unraid-starfield/main">
 <!ENTITY pluginURL "&gitURL;/&name;.plg">
@@ -395,9 +395,9 @@ button:not([role="tab"]):hover, a.button:hover { box-shadow: 0 0 12px rgba(226, 
 (function () {
   'use strict'
 
-  var CELL_W = 34 // block width (px)
-  var CELL_H = 12 // block height (px)
-  var GAP_X = 14 // gap between disk lanes
+  var CELL_W = 18 // block width (px): square blocks
+  var CELL_H = 18 // block height (px)
+  var GAP_X = 10 // gap between disk lanes
   var GAP_Y = 4 // gap between blocks
   var PARITY_EVERY = 7 // every Nth lane is a parity disk
   var FRAME_MS = 1000 / 24
