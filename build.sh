@@ -1,12 +1,12 @@
 #!/bin/bash
 # Build both theme plugins with their JS/CSS inlined:
-#   starfield.plg  Nebula palette + page-wide starfield
-#   hexgrid.plg    Ember palette (orange/grey/black) + animated hex grid
-#   parity.plg     Array palette (Unraid brand red->orange, Unraid's own fonts) + live disk-array background
+#   starfield-theme.plg  Nebula palette + page-wide starfield
+#   hexgrid-theme.plg    Ember palette (orange/grey/black) + animated hex grid
+#   parity-theme.plg     Array palette (Unraid brand red->orange, Unraid's own fonts) + live disk-array background
 # Fonts are not inlined: Unraid downloads them from GitHub to /boot/config/plugins/<name>/fonts/ (once) and the
 # install step copies them into emhttp (parity uses Unraid's bundled fonts and needs none).
 # Only one theme can be installed at a time (install refuses otherwise).
-THEMES="starfield hexgrid parity"
+THEMES="starfield-theme hexgrid-theme parity-theme"
 set -euo pipefail
 cd "$(dirname "$0")"
 GIT_URL="https://raw.githubusercontent.com/Aestylis/unraid-starfield/main"
@@ -38,7 +38,7 @@ build() { # name css js page change icon fonts(yes|no) title
 <INLINE>
 for t in$others; do
   if [ -d /usr/local/emhttp/plugins/\$t ]; then
-    echo "The \$t theme plugin is installed. Remove it first: only one of ${THEMES// //} can be active."
+    echo "The \$t theme plugin is installed. Remove it first: only one of ${THEMES// /, } can be active."
     exit 1
   fi
 done
@@ -129,6 +129,6 @@ FTR
   echo "built $name.plg v$VER"
 }
 
-build starfield nebula.css starfield.js StarfieldHeader.page "Nebula theme (violet, Orbitron/Exo 2) with a page-wide animated starfield" star yes "Starfield theme (Nebula)"
-build hexgrid ember.css hexgrid.js HexgridHeader.page "Ember theme (orange/grey/black, Orbitron/Exo 2) with an animated hex grid background" th yes "Hexgrid theme (Ember)"
-build parity array.css parity.js ParityHeader.page "Array theme (Unraid brand red/orange, Unraid fonts) with a live circuit-board background driven by real disk and network activity" hdd-o no "Parity theme (Array)"
+build starfield-theme nebula.css starfield.js StarfieldHeader.page "Nebula theme (violet, Orbitron/Exo 2) with a page-wide animated starfield" star yes "Starfield theme (Nebula)"
+build hexgrid-theme ember.css hexgrid.js HexgridHeader.page "Ember theme (orange/grey/black, Orbitron/Exo 2) with an animated hex grid background" th yes "Hexgrid theme (Ember)"
+build parity-theme array.css parity.js ParityHeader.page "Array theme (Unraid brand red/orange, Unraid fonts) with a live circuit-board background driven by real disk and network activity" hdd-o no "Parity theme (Array)"

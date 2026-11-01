@@ -1,6 +1,6 @@
 /* Unraid page background: a live circuit board (Array theme).
  * Data enters at a network connector on the left, runs through a controller chip, and fans out along copper traces to
- * one chip per disk on the right (parity, data disks, pools). Driven by real activity, polled from parity-stats.php
+ * one chip per disk on the right (parity, data disks, pools). Driven by real activity, polled from parity-theme-stats.php
  * every ~2 s while the tab is visible:
  * - writes travel as glowing packets left -> right along that disk's traces; reads travel right -> left;
  *   the packet rate follows the real MB/s (log scale) and active traces glow;
@@ -13,7 +13,7 @@
 (function () {
   'use strict'
 
-  var STATS_URL = '/plugins/parity/parity-stats.php'
+  var STATS_URL = '/plugins/parity-theme/parity-theme-stats.php'
   var POLL_MS = 2000
   var FRAME_MS = 1000 / 24
   var SPEED = 520 // packet speed, px/s

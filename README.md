@@ -20,9 +20,9 @@ Community Apps cards, and the System Stats charts. Status colours (green/red dis
 Plugins → Install Plugin, paste one of:
 
 ```
-https://raw.githubusercontent.com/Aestylis/unraid-starfield/main/starfield.plg
-https://raw.githubusercontent.com/Aestylis/unraid-starfield/main/hexgrid.plg
-https://raw.githubusercontent.com/Aestylis/unraid-starfield/main/parity.plg
+https://raw.githubusercontent.com/Aestylis/unraid-starfield/main/starfield-theme.plg
+https://raw.githubusercontent.com/Aestylis/unraid-starfield/main/hexgrid-theme.plg
+https://raw.githubusercontent.com/Aestylis/unraid-starfield/main/parity-theme.plg
 ```
 
 then hard-refresh the browser (Ctrl+Shift+R). **Only one can be installed at a time** — the installer refuses if another
@@ -46,7 +46,7 @@ With *prefers-reduced-motion* set, a single still frame is drawn.
 
 Each plugin installs a `Menu="Buttons"` page, which Unraid includes in the `<head>` of every webGui page. It loads one
 stylesheet (overriding Unraid's CSS variables, plus a few targeted rules) and one script that inserts a fixed
-`<canvas>` behind the page. No core files are modified. The Parity theme also installs `parity-stats.php`, a read-only JSON endpoint (behind the normal webGui login) that reports per-disk read/write rates from `diskload.ini`, usage/spin-down/temperature from `disks.ini`, and network throughput; the page polls it every 2 s only while the tab is visible.
+`<canvas>` behind the page. No core files are modified. The Parity theme also installs `parity-theme-stats.php`, a read-only JSON endpoint (behind the normal webGui login) that reports per-disk read/write rates from `diskload.ini`, usage/spin-down/temperature from `disks.ini`, and network throughput; the page polls it every 2 s only while the tab is visible.
 
 ## Building
 
