@@ -20,6 +20,7 @@ Kirigami.FormLayout {
     property real cfg_latitude: 42.51
     property real cfg_longitude: -123.39
     property int cfg_previewHour: -1
+    property string cfg_ploughNow: ""
 
     QQC2.ComboBox {
         id: sceneCombo
@@ -87,5 +88,11 @@ Kirigami.FormLayout {
         }
         currentIndex: root.cfg_previewHour + 1
         onActivated: root.cfg_previewHour = currentIndex - 1
+    }
+    QQC2.Button {
+        Kirigami.FormData.label: i18n("Snowplough:")
+        text: i18n("Send the plough (runs ~2 min after Apply)")
+        icon.name: "media-playback-start"
+        onClicked: root.cfg_ploughNow = String(Date.now())
     }
 }

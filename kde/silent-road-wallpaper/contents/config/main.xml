@@ -12,6 +12,7 @@
     <entry name="latitude" type="Double"><default>42.51</default></entry>
     <entry name="longitude" type="Double"><default>-123.39</default></entry>
     <entry name="previewHour" type="Int"><default>-1</default><min>-1</min><max>23</max></entry>
+    <entry name="ploughNow" type="String"><default></default></entry>
     <entry name="erosionMode" type="Int"><default>0</default></entry>
   </group>
 </kcfg>

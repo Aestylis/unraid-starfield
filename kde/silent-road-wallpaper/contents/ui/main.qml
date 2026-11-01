@@ -27,6 +27,9 @@ WallpaperItem {
     readonly property int erosionMode: main.configuration.erosionMode || 0   // 0 follows the day, 1 always clear, 2 always buried
     readonly property real latitude: main.configuration.latitude !== undefined ? main.configuration.latitude : 42.51
     readonly property real longitude: main.configuration.longitude !== undefined ? main.configuration.longitude : -123.39
+    // writing a fresh timestamp here (settings button, or a script) sends the plough through right away
+    readonly property string ploughNow: main.configuration.ploughNow || ""
+    property real forcedPloughMs: 0
     readonly property int previewHour: main.configuration.previewHour !== undefined ? main.configuration.previewHour : -1
 
     // ------------------------------------------------------------------ clocks
@@ -124,6 +127,10 @@ WallpaperItem {
                 if (m >= P && m < P + 2) plough = (m - P) / 2                    // the plough's two minutes
             }
         }
+        // a forced run: fresh snow on the road ahead of the plough, cleared behind it, over ~2 minutes
+        var fp = (Date.now() - forcedPloughMs) / 120000
+        if (forcedPloughMs > 0 && fp >= 0 && fp <= 1) { plough = fp; cover = 1; e = Math.max(e, 0.35) }
+        else if (forcedPloughMs > 0 && fp > 1 && fp < 1.5) cover = Math.min(cover, 0.03)   // stays clear a while after
         fx.erosion = e
         fx.roadCover = cover
         fx.plough = plough
@@ -158,6 +165,10 @@ WallpaperItem {
 
     Component.onCompleted: update()
     onPreviewHourChanged: update()
+    onPloughNowChanged: {
+        var t = parseInt(ploughNow)
+        if (t > 0 && Math.abs(Date.now() - t) < 10 * 60000) { forcedPloughMs = Date.now(); update() }
+    }
     onErosionModeChanged: update()
     onLatitudeChanged: { times = sunTimes(new Date()); ploughStartMin = times.rise + 25; update() }
     onLongitudeChanged: { times = sunTimes(new Date()); ploughStartMin = times.rise + 25; update() }
@@ -166,7 +177,7 @@ WallpaperItem {
         interval: Math.round(1000 / Math.max(5, main.fps))
         running: true
         repeat: true
-        onTriggered: fx.time = main.clockSeconds()
+        onTriggered: { fx.time = main.clockSeconds(); if (fx.plough >= 0) main.update() }
     }
     Timer {                                   // the day moves slowly: sun, lamps, snow timeline every 2 s
         interval: 2000
