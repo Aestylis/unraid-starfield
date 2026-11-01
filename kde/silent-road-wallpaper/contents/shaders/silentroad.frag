@@ -35,6 +35,8 @@ float vnoise(vec2 p) {
     f = f * f * (3.0 - 2.0 * f);
     return mix(mix(hash21(i), hash21(i + vec2(1, 0)), f.x), mix(hash21(i + vec2(0, 1)), hash21(i + vec2(1, 1)), f.x), f.y);
 }
+uint pcg(uint v) { uint st = v * 747796405u + 2891336453u; uint w = ((st >> ((st >> 28u) + 4u)) ^ st) * 277803737u; return (w >> 22u) ^ w; }
+float uh(vec2 c, float salt) { ivec2 i = ivec2(floor(c)); return float(pcg(uint(i.x) * 1973u ^ pcg(uint(i.y) * 9277u + uint(salt)))) / 4294967295.0; }
 float noise1(float x) { float i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f); return mix(hash11(i), hash11(i + 1.0), f); }
 float bayer4(vec2 q) {
     int x = int(mod(q.x, 4.0)), y = int(mod(q.y, 4.0));
@@ -265,15 +267,15 @@ void main() {
         float bright= l == 0 ? 0.35 : l == 1 ? 0.55 : l == 2 ? 0.8  : 0.9;
         // varied fall speed: every column of cells has its own pace, so flakes slide past each other
         float sx = pp.x - wind * wm;
-        float colH = hash11(floor(sx / cs) * 0.618 + float(l) * 9.1);
+        float colH = uh(vec2(floor(sx / cs), 0.0), float(l) * 17.0 + 0.0);
         vec2 sp = vec2(sx, pp.y + time * speed * (0.6 + 0.8 * colH) + colH * 997.0);
         vec2 cell = floor(sp / cs);
-        vec2 h = hash22(cell + float(l) * 31.7);
+        vec2 h = vec2(uh(cell, float(l) * 31.0 + 1.0), uh(cell, float(l) * 31.0 + 2.0));
         // patchy, breathing snowfall: slow drifting bands of heavier/lighter snow + intensity that swells over minutes
-        float patchy = smoothstep(0.2, 0.8, vnoise(cell * cs * 0.011 + vec2(time * 0.018, -time * 0.008) + float(l) * 3.7));
+        float patchy = smoothstep(0.2, 0.8, vnoise(mod(cell * cs * 0.011 + vec2(time * 0.018, -time * 0.008), 512.0) + float(l) * 3.7));
         float swell = 0.5 + 0.5 * noise1(time / 70.0 + float(l) * 1.3);
         if (h.x > dens * (0.25 + 1.5 * patchy) * (0.45 + 0.75 * swell)) continue;
-        vec2 c = (cell + 0.15 + 0.7 * hash22(cell * 1.37 + float(l))) * cs;
+        vec2 c = (cell + 0.15 + 0.7 * vec2(uh(cell, float(l) * 31.0 + 3.0), uh(cell, float(l) * 31.0 + 4.0))) * cs;
         c.x += sin(time * (0.3 + 0.9 * h.y) + h.y * 40.0) * (0.3 + 1.7 * hash11(h.y * 71.0)) * (1.0 + float(l));   // each flake its own sway       // gentle sway
         float d = length(sp - c);
         if (d < size) flake = max(flake, bright * (l == 3 ? smoothstep(size, size * 0.3, d) : 1.0));
@@ -282,7 +284,7 @@ void main() {
         float lit = clamp(L * 1.4, 0.0, 1.0);
         float vis = mix(0.10, 1.0, lit) * flake;                               // almost invisible in the dark
         vec3 fc = mix(vec3(0.55, 0.60, 0.68), vec3(1.0, 0.88, 0.70), lit);
-        if (lit > 0.55 && hash21(q + floor(time * 6.0)) > 0.93) { fc = vec3(1.0, 0.95, 0.85); vis = 1.0; }  // sparkle
+        if (lit > 0.55 && uh(q + vec2(floor(time * 6.0), 0.0), 77.0) > 0.93) { fc = vec3(1.0, 0.95, 0.85); vis = 1.0; }  // sparkle
         col = mix(col, fc, vis);
     }
 

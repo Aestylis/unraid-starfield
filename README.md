@@ -86,5 +86,8 @@ clear in the daytime, fog thickening and the fence sinking from ~18:00, most bur
 kpackagetool6 -t Plasma/Wallpaper -i kde/silent-road-wallpaper
 ```
 
-Pick **Silent County Road** under *Desktop and Wallpaper → Wallpaper type*. Settings: pixel size, frame rate, snow,
+Pick **Silent County Road** under *Desktop and Wallpaper → Wallpaper type*. For a monitor above the road, set
+**Scene: Sky** on that screen: the moon in its real current phase behind drifting snow clouds, sharing the same clock,
+wind and snowfall. Pixel blocks are sized in physical pixels so scaled monitors match. Shaders use an integer hash, so
+compile them for desktop GL/Vulkan: `qsb --glsl "150,330" --hlsl 50 --msl 12 -o sky.frag.qsb sky.frag`. Settings: pixel size, frame rate, snow,
 fog, wind, and winter mode (follows the night / always clear / always buried).
