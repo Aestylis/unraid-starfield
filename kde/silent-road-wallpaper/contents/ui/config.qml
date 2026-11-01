@@ -14,6 +14,7 @@ Kirigami.FormLayout {
     property alias cfg_snowDensity: snowSlider.value
     property alias cfg_fogDensity: fogSlider.value
     property alias cfg_windStrength: windSlider.value
+    property alias cfg_flicker: flickerSlider.value
     property alias cfg_erosionMode: erosionCombo.currentIndex
 
     QQC2.SpinBox {
@@ -39,6 +40,11 @@ Kirigami.FormLayout {
     QQC2.Slider {
         id: windSlider
         Kirigami.FormData.label: i18n("Wind:")
+        from: 0; to: 100; stepSize: 1
+    }
+    QQC2.Slider {
+        id: flickerSlider
+        Kirigami.FormData.label: i18n("Lamp flicker:")
         from: 0; to: 100; stepSize: 1
     }
     QQC2.ComboBox {

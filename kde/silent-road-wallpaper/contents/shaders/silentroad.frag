@@ -7,6 +7,7 @@
 //   FOG    slow value-noise fog, thickest near the horizon, warmed inside lamplight
 //   SNOW   hash-generated flakes in 3 depth layers + rare near flakes; nearly invisible unless lamp-lit
 //   WIND   slow "moods" from layered low-frequency noise (calm / drift / whisper gust)
+//   FLICKER lamps burn steady, then rarely stutter for a few seconds (the far lamp is the dying one)
 //   WINTER `erosion` (0..1, driven by the real clock) thickens fog, softens the road edge, buries the fence,
 //          and grows snow caps — the road slowly disappears through the night.
 layout(location = 0) in vec2 qt_TexCoord0;
@@ -21,6 +22,7 @@ layout(std140, binding = 0) uniform buf {
     float fogAmt;    // 0..1
     float windAmt;   // 0..1
     float erosion;   // 0..1
+    float flickerAmt;// 0..2 (1 = default)
     vec2 res;        // item size
 };
 
@@ -122,6 +124,21 @@ float lampLight(vec2 p, vec2 head, float g, float k, out float halo) {
     return max(cone * 0.75, pool);
 }
 
+// Lamp flicker: time is split into windows; a window hosts a stutter episode with probability `chance`.
+// Inside the episode the lamp jumps between dim/off/on at ~12 Hz, with brief full blackouts. Returns intensity 0..1.
+float flicker(float t, float seed, float window, float chance) {
+    float w = floor(t / window);
+    if (hash11(w * 1.731 + seed) > chance) return 1.0;
+    float start = hash11(w * 3.17 + seed) * (window - 6.0);
+    float len = 1.2 + hash11(w * 5.91 + seed) * 3.8;
+    float local = t - w * window - start;
+    if (local < 0.0 || local > len) return 1.0;
+    float tick = floor(t * 12.0);
+    float r = hash11(tick * 0.917 + seed);
+    float dead = step(0.82, hash11(floor(t * 3.0) * 1.37 + seed));           // ~1/3 s blackouts
+    return mix(r < 0.45 ? 0.08 : r < 0.75 ? 0.55 : 1.0, 0.04, dead);
+}
+
 void main() {
     // coarse pixel grid
     vec2 W = floor(res / pix);
@@ -136,8 +153,11 @@ void main() {
     // ---------------- LIGHT (two streetlamps along the left verge)
     vec2 lamp1 = vec2(roadCx(0.20) - roadHw(0.20) - 0.02 + 0.07, 0.52); float g1 = 0.20;
     vec2 lamp2 = vec2(roadCx(0.355) - roadHw(0.355) - 0.012 + 0.022, 0.468); float g2 = 0.355;
+    float f1 = mix(1.0, flicker(time, 3.0, 90.0, 0.35 * max(flickerAmt, 1.0)), min(flickerAmt, 1.0));           // near lamp: rare stutters
+    float f2 = mix(1.0, flicker(time + 7.0, 11.0, 40.0, 0.40 * max(flickerAmt, 1.0)), min(flickerAmt, 1.0));    // far lamp: dying, more often
     float h1, h2;
-    float L = lampLight(p, lamp1, g1, 1.0, h1) + lampLight(p, lamp2, g2, 0.45, h2);
+    float L = lampLight(p, lamp1, g1, 1.0, h1) * f1 + lampLight(p, lamp2, g2, 0.45, h2) * f2;
+    h1 *= f1; h2 *= f2;
     float halo = h1 + h2;
     vec3 warm = vec3(0.86, 0.66, 0.40);
 
@@ -214,8 +234,8 @@ void main() {
     if (segPx(p, l1b, l1t) < 0.8 || segPx(p, l1t, lamp1 + vec2(0.0, 0.006)) < 0.6) col = vec3(0.05, 0.055, 0.07);
     vec2 l2b = vec2(lamp2.x - 0.022, g2), l2t = vec2(lamp2.x - 0.022, lamp2.y + 0.004);
     if (segPx(p, l2b, l2t) < 0.6 || segPx(p, l2t, lamp2 + vec2(0.0, 0.003)) < 0.5) col = vec3(0.06, 0.065, 0.08);
-    if (length((p - lamp1) / vec2(0.012, 0.006)) < 1.0) col = vec3(0.95, 0.83, 0.62);
-    if (length((p - lamp2) / vec2(0.006, 0.0035)) < 1.0) col = vec3(0.80, 0.64, 0.42);
+    if (length((p - lamp1) / vec2(0.012, 0.006)) < 1.0) col = mix(vec3(0.33, 0.26, 0.19), vec3(0.95, 0.83, 0.62), f1);
+    if (length((p - lamp2) / vec2(0.006, 0.0035)) < 1.0) col = mix(vec3(0.30, 0.24, 0.18), vec3(0.80, 0.64, 0.42), f2);
     if (abs(p.x - lamp1.x) < 0.012 && p.y > lamp1.y + 0.006 && p.y < lamp1.y + 0.006 + px1 * (1.0 + e)) col = vec3(0.44, 0.48, 0.56);
 
     // ---------------- LAMPLIGHT on the scene (snow takes the warm light; dark shapes barely)

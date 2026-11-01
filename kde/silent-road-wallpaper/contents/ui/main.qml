@@ -15,6 +15,7 @@ WallpaperItem {
     readonly property real snowAmt: (main.configuration.snowDensity !== undefined ? main.configuration.snowDensity : 50) / 100
     readonly property real fogAmt: (main.configuration.fogDensity !== undefined ? main.configuration.fogDensity : 50) / 50
     readonly property real windAmt: (main.configuration.windStrength !== undefined ? main.configuration.windStrength : 50) / 50
+    readonly property real flickerAmt: (main.configuration.flicker !== undefined ? main.configuration.flicker : 50) / 50
     readonly property int erosionMode: main.configuration.erosionMode || 0   // 0 clock, 1 always clear, 2 always buried
 
     property real startMs: Date.now()
@@ -42,6 +43,7 @@ WallpaperItem {
         property real fogAmt: main.fogAmt
         property real windAmt: main.windAmt
         property real erosion: main.erosionNow()
+        property real flickerAmt: main.flickerAmt          // 0..2: up to 1 = depth, beyond = more often
         property size res: Qt.size(width, height)
         fragmentShader: Qt.resolvedUrl("../shaders/silentroad.frag.qsb")
     }
