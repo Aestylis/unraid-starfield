@@ -17,8 +17,8 @@
   var PARITY_EVERY = 7 // every Nth lane is a parity disk
   var FRAME_MS = 1000 / 24
   var COOL_PER_S = 0.55 // heat lost per second
-  var WRITES_PER_S = 9 // random single-block writes
-  var RUNS_PER_S = 0.7 // sequential write runs
+  var WRITES_PER_S = 3 // random single-block writes
+  var RUNS_PER_S = 0.25 // sequential write runs
   var SWEEP_S = 38 // seconds for the parity check band to cross the screen
   var HOVER_RADIUS = 130
   var BG = '#0b0b0c'
@@ -150,7 +150,7 @@
       writes -= 1
     }
     // sequential runs down a lane
-    if (Math.random() < RUNS_PER_S * s) this.runs.push({ lane: this.randomDataLane(), row: (Math.random() * this.rows * 0.6) | 0, left: 6 + ((Math.random() * 18) | 0), acc: 0 })
+    if (Math.random() < RUNS_PER_S * s) this.runs.push({ lane: this.randomDataLane(), row: (Math.random() * this.rows * 0.6) | 0, left: 4 + ((Math.random() * 10) | 0), acc: 0 })
     for (var k = this.runs.length - 1; k >= 0; k--) {
       var run = this.runs[k]
       run.acc += s
