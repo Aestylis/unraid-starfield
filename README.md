@@ -73,3 +73,18 @@ kpackagetool6 -t Plasma/Wallpaper -i kde/hexgrid-wallpaper      # upgrade later 
 ```
 
 Settings: hex size, frame rate, swaps per second.
+
+## Bonus: Silent County Road (KDE Plasma 6 wallpaper)
+
+`kde/silent-road-wallpaper/` is a fully procedural pixel-art winter night — an empty snowy road, two dim streetlamps,
+a leaning utility pole, buried fence posts — rendered by one GPU fragment shader (no images). 16-colour palette with
+ordered dithering; hash-based snow in three depth layers that is nearly invisible except inside the lamplight; wind
+that drifts through calm/drift/gust moods; fog that gathers. **The road slowly disappears through the real night**:
+clear in the daytime, fog thickening and the fence sinking from ~18:00, most buried around 03:30, clearing by ~07:00.
+
+```
+kpackagetool6 -t Plasma/Wallpaper -i kde/silent-road-wallpaper
+```
+
+Pick **Silent County Road** under *Desktop and Wallpaper → Wallpaper type*. Settings: pixel size, frame rate, snow,
+fog, wind, and winter mode (follows the night / always clear / always buried).
