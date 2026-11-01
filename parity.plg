@@ -1,7 +1,7 @@
 <?xml version='1.0' standalone='yes'?>
 <!DOCTYPE PLUGIN [
 <!ENTITY name "parity">
-<!ENTITY version "2026.11.01.0016">
+<!ENTITY version "2026.11.01.0018">
 <!ENTITY emhttp "/usr/local/emhttp/plugins/&name;">
 <!ENTITY gitURL "https://raw.githubusercontent.com/Aestylis/unraid-starfield/main">
 <!ENTITY pluginURL "&gitURL;/&name;.plg">
@@ -9,7 +9,7 @@
 <PLUGIN name="&name;" author="Aestylis" version="&version;" min="7.3.0" icon="hdd-o" pluginURL="&pluginURL;" support="https://github.com/Aestylis/unraid-starfield/issues">
 <CHANGES>
 ###&version;
-- Array theme (Unraid brand red/orange, Unraid fonts) with a live disk-array background
+- Array theme (Unraid brand red/orange, Unraid fonts) with a live circuit-board background driven by real disk and network activity
 </CHANGES>
 <FILE Run="/bin/bash">
 <INLINE>
@@ -890,6 +890,15 @@ button:not([role="tab"]):hover, a.button:hover { box-shadow: 0 0 12px rgba(226, 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start)
   else start()
 })()
+]]>
+</INLINE>
+</FILE>
+<FILE Name="&emhttp;/README.md">
+<INLINE>
+<![CDATA[
+**Parity theme (Array)**
+
+Array theme (Unraid brand red/orange, Unraid fonts) with a live circuit-board background driven by real disk and network activity. Only one theme from this set (Starfield, Hexgrid, Parity) can be installed at a time; remove it to restore the stock look.
 ]]>
 </INLINE>
 </FILE>

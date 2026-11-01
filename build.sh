@@ -13,8 +13,8 @@ GIT_URL="https://raw.githubusercontent.com/Aestylis/unraid-starfield/main"
 python3 make-themes.py >/dev/null
 VER=$(date +%Y.%m.%d.%H%M)
 
-build() { # name css js page change icon fonts(yes|no)
-  local name=$1 css=$2 js=$3 page=$4 change=$5 icon=$6 fonts=$7
+build() { # name css js page change icon fonts(yes|no) title
+  local name=$1 css=$2 js=$3 page=$4 change=$5 icon=$6 fonts=$7 title=$8
   local others=""; for t in $THEMES; do [ "$t" != "$name" ] && others="$others $t"; done
   for f in "$css" "$js"; do
     if grep -q "]]>" "$f"; then echo "$f contains ]]>" >&2; exit 1; fi
@@ -95,6 +95,10 @@ MID
 </INLINE>
 </FILE>
 EOJS
+  # README shown on the Plugins page
+  printf '<FILE Name="&emhttp;/README.md">\n<INLINE>\n<![CDATA[\n'
+  printf '**%s**\n\n%s. Only one theme from this set (Starfield, Hexgrid, Parity) can be installed at a time; remove it to restore the stock look.\n' "$title" "$change"
+  printf ']]>\n</INLINE>\n</FILE>\n'
   # optional live-data endpoint (parity theme)
   if [ -f "$name-stats.php" ]; then
     if grep -q "]]>" "$name-stats.php"; then echo "$name-stats.php contains ]]>" >&2; exit 1; fi
@@ -125,6 +129,6 @@ FTR
   echo "built $name.plg v$VER"
 }
 
-build starfield nebula.css starfield.js StarfieldHeader.page "Nebula theme (violet, Orbitron/Exo 2) with a page-wide animated starfield" star yes
-build hexgrid ember.css hexgrid.js HexgridHeader.page "Ember theme (orange/grey/black, Orbitron/Exo 2) with an animated hex grid background" th yes
-build parity array.css parity.js ParityHeader.page "Array theme (Unraid brand red/orange, Unraid fonts) with a live disk-array background" hdd-o no
+build starfield nebula.css starfield.js StarfieldHeader.page "Nebula theme (violet, Orbitron/Exo 2) with a page-wide animated starfield" star yes "Starfield theme (Nebula)"
+build hexgrid ember.css hexgrid.js HexgridHeader.page "Ember theme (orange/grey/black, Orbitron/Exo 2) with an animated hex grid background" th yes "Hexgrid theme (Ember)"
+build parity array.css parity.js ParityHeader.page "Array theme (Unraid brand red/orange, Unraid fonts) with a live circuit-board background driven by real disk and network activity" hdd-o no "Parity theme (Array)"

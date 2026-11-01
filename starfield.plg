@@ -1,7 +1,7 @@
 <?xml version='1.0' standalone='yes'?>
 <!DOCTYPE PLUGIN [
 <!ENTITY name "starfield">
-<!ENTITY version "2026.11.01.0016">
+<!ENTITY version "2026.11.01.0018">
 <!ENTITY emhttp "/usr/local/emhttp/plugins/&name;">
 <!ENTITY gitURL "https://raw.githubusercontent.com/Aestylis/unraid-starfield/main">
 <!ENTITY pluginURL "&gitURL;/&name;.plg">
@@ -560,6 +560,15 @@ html:root:root {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start)
   else start()
 })()
+]]>
+</INLINE>
+</FILE>
+<FILE Name="&emhttp;/README.md">
+<INLINE>
+<![CDATA[
+**Starfield theme (Nebula)**
+
+Nebula theme (violet, Orbitron/Exo 2) with a page-wide animated starfield. Only one theme from this set (Starfield, Hexgrid, Parity) can be installed at a time; remove it to restore the stock look.
 ]]>
 </INLINE>
 </FILE>
